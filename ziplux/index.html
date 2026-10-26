@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ЗИП ЛЮКС — ZIP-системы ALUTECH для домов, террас и кафе</title>
+  <meta name="description" content="ЗИП ЛЮКС: продажа и монтаж ZIP-экранов ALUTECH. Защита от солнца, ветра и насекомых для панорамных окон, террас, пергол и летних веранд. Онлайн-конфигуратор, бесплатный замер.">
+  <meta name="theme-color" content="#14110f">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ЗИП ЛЮКС — ZIP-системы ALUTECH">
+  <meta property="og:description" content="Тень, которая держит ветер. Соберите свой ZIP-экран и узнайте цену за минуту.">
+  <meta property="og:locale" content="ru_RU">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HomeAndConstructionBusiness",
+    "name": "ЗИП ЛЮКС",
+    "description": "Продажа и монтаж ZIP-систем ALUTECH",
+    "telephone": "+7-000-000-00-00",
+    "email": "info@example.com",
+    "address": { "@type": "PostalAddress", "addressLocality": "Ваш город", "addressCountry": "RU" },
+    "openingHours": "Mo-Sa 09:00-20:00"
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Перейти к содержанию</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="hdr" id="hdr">
+    <div class="wrap hdr__row">
+      <a class="brand" href="#top" aria-label="ЗИП ЛЮКС — на главную">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="4" width="26" height="5" rx="1.5"/><path d="M6 9v19M26 9v19" stroke-width="2.4"/><rect class="brand__cloth" x="8" y="9" width="16" height="14"/></svg>
+        <span class="brand__name">ЗИП <em>ЛЮКС</em></span>
+      </a>
+      <nav class="menu" id="menu" aria-label="Основное меню">
+        <a href="#solutions">Решения</a>
+        <a href="#compare">Почему ZIP</a>
+        <a href="#tech">Технология</a>
+        <a href="#config">Конфигуратор</a>
+        <a href="#process">Как работаем</a>
+        <a href="#faq">Вопросы</a>
+        <a class="menu__phone" href="tel:+70000000000">+7 (000) 000-00-00</a>
+      </nav>
+      <a class="hdr__phone" href="tel:+70000000000">+7 (000) 000-00-00</a>
+      <a class="btn btn--brass hdr__cta" href="#lead">Бесплатный замер</a>
+      <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="top">
+      <div class="wrap hero__grid">
+        <div class="hero__copy">
+          <p class="kicker reveal">ZIP-системы ALUTECH · продажа и монтаж</p>
+          <h1 class="reveal">Тень, которая <i>держит ветер</i></h1>
+          <p class="hero__lead reveal">Наружные ZIP-экраны закрывают панорамные окна, террасы и веранды от солнца, ветра и насекомых. Ткань зафиксирована молнией по всей высоте — никаких хлопков, щелей и комаров.</p>
+          <div class="hero__btns reveal">
+            <a class="btn btn--brass btn--lg" href="#config">Собрать свой экран</a>
+            <a class="btn btn--line btn--lg" href="#lead">Вызвать замерщика</a>
+          </div>
+          <ul class="hero__facts reveal">
+            <li><b>4,5 × 4,8 м</b><span>максимальный проём</span></li>
+            <li><b>1 день</b><span>на монтаж</span></li>
+            <li><b>0 ₽</b><span>замер и расчёт</span></li>
+          </ul>
+        </div>
+
+        <figure class="scene reveal" aria-labelledby="sceneCap">
+          <svg viewBox="0 0 600 520" id="scene" role="img" aria-label="Терраса дома с ZIP-экраном, который можно опустить ползунком">
+            <defs>
+              <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2b06b"/><stop offset=".6" stop-color="#f6d3a3"/><stop offset="1" stop-color="#f9e6c8"/></linearGradient>
+              <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9bb8c6"/><stop offset="1" stop-color="#5d7d8e"/></linearGradient>
+              <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b98d63"/><stop offset="1" stop-color="#8e6847"/></linearGradient>
+              <pattern id="gWeave" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" style="fill:var(--cloth)"/><rect width="2" height="2" style="fill:#fff;opacity:var(--holes)"/></pattern>
+              <clipPath id="cOpen"><rect x="96" y="150" width="408" height="300"/></clipPath>
+            </defs>
+            <rect width="600" height="520" rx="30" fill="url(#gSky)"/>
+            <circle class="sun" cx="480" cy="92" r="40" fill="#ffcf6e"/>
+            <g class="rays" stroke="#ffcf6e" stroke-width="3" stroke-linecap="round" opacity=".7">
+              <path d="M400 150 L250 330"/><path d="M430 160 L320 380"/><path d="M455 170 L400 400"/>
+            </g>
+            <!-- pergola -->
+            <rect x="70" y="120" width="460" height="24" fill="#2a2421"/>
+            <rect x="70" y="144" width="26" height="320" fill="#2a2421"/>
+            <rect x="504" y="144" width="26" height="320" fill="#2a2421"/>
+            <!-- inside -->
+            <g clip-path="url(#cOpen)">
+              <rect x="96" y="150" width="408" height="300" fill="url(#gGlass)" opacity=".35"/>
+              <rect x="96" y="380" width="408" height="70" fill="url(#gFloor)"/>
+              <!-- sofa -->
+              <rect x="150" y="330" width="170" height="60" rx="12" fill="#e9e1d4"/>
+              <rect x="150" y="300" width="170" height="40" rx="12" fill="#ded4c4"/>
+              <rect x="370" y="350" width="80" height="10" rx="4" fill="#5a4636"/>
+              <rect x="405" y="360" width="10" height="40" fill="#5a4636"/>
+              <ellipse cx="410" cy="345" rx="18" ry="8" fill="#7d9b6b"/>
+              <!-- heat glow on sofa -->
+              <rect class="heat" x="96" y="150" width="408" height="300" fill="#ff8a3d"/>
+            </g>
+            <!-- zip screen -->
+            <g class="zip">
+              <rect class="zip__cloth" id="cloth" x="96" y="150" width="408" height="300" fill="url(#gWeave)"/>
+              <rect class="zip__bar" id="bar" x="92" y="444" width="416" height="10" rx="2" fill="#1d1916"/>
+            </g>
+            <rect x="80" y="140" width="440" height="14" rx="3" fill="#1d1916"/>
+            <rect x="92" y="150" width="6" height="304" fill="#1d1916"/>
+            <rect x="502" y="150" width="6" height="304" fill="#1d1916"/>
+            <rect x="40" y="464" width="520" height="16" rx="4" fill="#6f5a48"/>
+            <ellipse cx="54" cy="470" rx="40" ry="26" fill="#6b8a5b"/>
+            <ellipse cx="560" cy="472" rx="36" ry="22" fill="#7a9969"/>
+          </svg>
+          <div class="scene__ctrl">
+            <label for="screenPos">Опустите экран</label>
+            <input type="range" id="screenPos" min="0" max="100" value="70" aria-valuetext="Экран опущен на 70%">
+            <span class="scene__out" id="scenePct">70%</span>
+          </div>
+          <figcaption id="sceneCap" class="scene__cap"><span class="chip" id="sceneMsg">Солнце остаётся снаружи</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===== TRUST STRIP ===== -->
+    <section class="trust" aria-label="Наши гарантии">
+      <div class="wrap trust__row">
+        <div class="trust__item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg><span><b>Гарантия по договору</b>на систему и монтаж</span></div>
+        <div class="trust__item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><span><b>Системы ALUTECH</b>заводское качество</span></div>
+        <div class="trust__item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M17 14l4 4-4 4" transform="translate(-2 -4)"/></svg><span><b>Цена фиксируется</b>в договоре до монтажа</span></div>
+        <div class="trust__item"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span><b>Замер за 24 часа</b>с образцами тканей</span></div>
+      </div>
+    </section>
+
+    <!-- ===== SOLUTIONS ===== -->
+    <section class="sec" id="solutions">
+      <div class="wrap">
+        <header class="sec__head reveal">
+          <p class="kicker">Решения</p>
+          <h2>Под каждый объект — своя конфигурация</h2>
+        </header>
+        <div class="sol">
+          <div class="sol__tabs" role="tablist" aria-label="Тип объекта">
+            <button role="tab" id="t-house" aria-controls="p-sol" aria-selected="true" data-sol="house">Частный дом</button>
+            <button role="tab" id="t-terrace" aria-controls="p-sol" aria-selected="false" data-sol="terrace" tabindex="-1">Терраса</button>
+            <button role="tab" id="t-pergola" aria-controls="p-sol" aria-selected="false" data-sol="pergola" tabindex="-1">Пергола</button>
+            <button role="tab" id="t-horeca" aria-controls="p-sol" aria-selected="false" data-sol="horeca" tabindex="-1">Кафе и рестораны</button>
+          </div>
+          <div class="sol__panel" id="p-sol" role="tabpanel" aria-labelledby="t-house" tabindex="0">
+            <div class="sol__art" id="solArt" aria-hidden="true"></div>
+            <div class="sol__text">
+              <h3 id="solTitle"></h3>
+              <p id="solLead"></p>
+              <ul class="ticks" id="solList"></ul>
+              <dl class="sol__rec">
+                <div><dt>Рекомендуемая ткань</dt><dd id="solFabric"></dd></div>
+                <div><dt>Управление</dt><dd id="solControl"></dd></div>
+              </dl>
+              <button class="btn btn--dark" type="button" id="solToConfig">Рассчитать для этого объекта</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== COMPARE ===== -->
+    <section class="sec sec--sand" id="compare">
+      <div class="wrap">
+        <header class="sec__head reveal">
+          <p class="kicker">Почему ZIP</p>
+          <h2>Чем ZIP-экран лучше обычной шторы и маркизы</h2>
+        </header>
+        <div class="tbl reveal" role="region" aria-label="Сравнение систем" tabindex="0">
+          <table>
+            <thead>
+              <tr><th scope="col">Параметр</th><th scope="col" class="tbl__hl">ZIP-экран</th><th scope="col">Рулонная штора</th><th scope="col">Маркиза</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Тепло задерживается до стекла</th><td class="tbl__hl"><span class="y">Да</span></td><td><span class="n">Нет, внутри</span></td><td><span class="y">Да</span></td></tr>
+              <tr><th scope="row">Устойчивость к ветру</th><td class="tbl__hl"><span class="y">Высокая, ткань в направляющих</span></td><td><span class="n">Не для улицы</span></td><td><span class="m">Средняя</span></td></tr>
+              <tr><th scope="row">Защита от насекомых</th><td class="tbl__hl"><span class="y">Да, без боковых щелей</span></td><td><span class="n">Нет</span></td><td><span class="n">Нет</span></td></tr>
+              <tr><th scope="row">Закрывает вертикальный проём</th><td class="tbl__hl"><span class="y">Полностью</span></td><td><span class="m">Только окно</span></td><td><span class="n">Нет, только сверху</span></td></tr>
+              <tr><th scope="row">Приватность днём</th><td class="tbl__hl"><span class="y">Да, с обзором наружу</span></td><td><span class="y">Да, без обзора</span></td><td><span class="n">Нет</span></td></tr>
+              <tr><th scope="row">Автоматизация и датчики</th><td class="tbl__hl"><span class="y">Да</span></td><td><span class="m">Опционально</span></td><td><span class="y">Да</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TECH ===== -->
+    <section class="sec sec--night" id="tech">
+      <div class="wrap tech">
+        <header class="sec__head reveal">
+          <p class="kicker">Технология</p>
+          <h2>Шесть деталей, из которых складывается надёжность</h2>
+          <p class="sec__sub">Нажмите на точку на схеме или выберите деталь в списке.</p>
+        </header>
+        <div class="tech__grid">
+          <svg class="tech__svg reveal" viewBox="0 0 420 460" aria-hidden="true">
+            <rect x="40" y="30" width="340" height="46" rx="8" fill="#2b2622" stroke="#4b423b"/>
+            <rect x="60" y="44" width="300" height="18" rx="9" fill="#3d3530"/>
+            <rect x="74" y="48" width="44" height="10" rx="5" fill="#c8a26a"/>
+            <rect x="40" y="76" width="22" height="350" fill="#2b2622" stroke="#4b423b"/>
+            <rect x="358" y="76" width="22" height="350" fill="#2b2622" stroke="#4b423b"/>
+            <rect x="62" y="76" width="296" height="330" fill="#544b44" opacity=".85"/>
+            <g stroke="#6a6058" stroke-width="1">
+              <path d="M62 100h296M62 130h296M62 160h296M62 190h296M62 220h296M62 250h296M62 280h296M62 310h296M62 340h296M62 370h296"/>
+            </g>
+            <path d="M64 80 v322 M356 80 v322" stroke="#c8a26a" stroke-width="3" stroke-dasharray="4 4"/>
+            <rect x="56" y="404" width="308" height="14" rx="3" fill="#1b1714" stroke="#4b423b"/>
+          </svg>
+          <div class="hotspots" id="hotspots">
+            <button class="hs" style="--x:85%;--y:12%" data-part="0" aria-label="Короб"><span>1</span></button>
+            <button class="hs" style="--x:50%;--y:11%" data-part="1" aria-label="Вал"><span>2</span></button>
+            <button class="hs" style="--x:23%;--y:11%" data-part="2" aria-label="Электропривод"><span>3</span></button>
+            <button class="hs" style="--x:50%;--y:52%" data-part="3" aria-label="Полотно"><span>4</span></button>
+            <button class="hs" style="--x:12%;--y:62%" data-part="4" aria-label="Направляющие и молния"><span>5</span></button>
+            <button class="hs" style="--x:50%;--y:90%" data-part="5" aria-label="Нижняя планка"><span>6</span></button>
+          </div>
+          <div class="tech__info">
+            <ol class="parts" id="partsList"></ol>
+            <dl class="specs reveal">
+              <div><dt>Ширина</dt><dd>до 4 500 мм</dd></div>
+              <div><dt>Высота</dt><dd>до 4 800 мм</dd></div>
+              <div><dt>Площадь</dt><dd>до 16,8 м²</dd></div>
+              <div><dt>Короб</dt><dd>110 / 125 мм</dd></div>
+              <div><dt>Направляющая</dt><dd>33 × 43 мм</dd></div>
+              <div><dt>Ветер</dt><dd>расчёт по EN 13561</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONFIGURATOR ===== -->
+    <section class="sec" id="config">
+      <div class="wrap">
+        <header class="sec__head reveal">
+          <p class="kicker">Конфигуратор</p>
+          <h2>Соберите экран и узнайте цену</h2>
+          <p class="sec__sub">Цена ориентировочная. Точную сумму зафиксируем в договоре после бесплатного замера.</p>
+        </header>
+        <form class="cfg" id="cfg" novalidate>
+          <div class="cfg__steps">
+            <fieldset class="cfg__step">
+              <legend><span>1</span> Размер проёма</legend>
+              <div class="cfg__size">
+                <label>Ширина, м<input id="cW" inputmode="decimal" value="3,0" aria-describedby="sizeErr"></label>
+                <span class="cfg__x" aria-hidden="true">×</span>
+                <label>Высота, м<input id="cH" inputmode="decimal" value="2,6" aria-describedby="sizeErr"></label>
+                <label>Кол-во<input id="cQ" inputmode="numeric" value="1"></label>
+              </div>
+              <p class="cfg__err" id="sizeErr" role="alert"></p>
+            </fieldset>
+
+            <fieldset class="cfg__step">
+              <legend><span>2</span> Ткань</legend>
+              <div class="opts opts--4" id="cOpen">
+                <label><input type="radio" name="open" value="0" data-k="1.15"><span><b>0%</b>Blackout</span></label>
+                <label><input type="radio" name="open" value="3" data-k="1" checked><span><b>3%</b>Максимум тени</span></label>
+                <label><input type="radio" name="open" value="5" data-k="1"><span><b>5%</b>Баланс</span></label>
+                <label><input type="radio" name="open" value="10" data-k="1"><span><b>10%</b>Лучший обзор</span></label>
+              </div>
+              <div class="swatch" id="cColor" aria-label="Цвет ткани" role="radiogroup">
+                <label title="Антрацит"><input type="radio" name="color" value="#2f3134" data-name="Антрацит" checked><i style="--c:#2f3134"></i><span>Антрацит</span></label>
+                <label title="Графит"><input type="radio" name="color" value="#56585b" data-name="Графит"><i style="--c:#56585b"></i><span>Графит</span></label>
+                <label title="Бронза"><input type="radio" name="color" value="#6d5845" data-name="Бронза"><i style="--c:#6d5845"></i><span>Бронза</span></label>
+                <label title="Лён"><input type="radio" name="color" value="#b7a88f" data-name="Лён"><i style="--c:#b7a88f"></i><span>Лён</span></label>
+                <label title="Жемчуг"><input type="radio" name="color" value="#dcd6cc" data-name="Жемчуг"><i style="--c:#dcd6cc"></i><span>Жемчуг</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="cfg__step">
+              <legend><span>3</span> Управление</legend>
+              <div class="opts opts--3" id="cCtrl">
+                <label><input type="radio" name="ctrl" value="remote" checked><span><b>Пульт</b>Радиопривод</span></label>
+                <label><input type="radio" name="ctrl" value="smart"><span><b>Smart</b>Смартфон и голос</span></label>
+                <label><input type="radio" name="ctrl" value="solar"><span><b>Solar</b>Без проводов</span></label>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cWind"><span class="toggle__ui" aria-hidden="true"></span> Датчик ветра и солнца</label>
+            </fieldset>
+
+            <fieldset class="cfg__step">
+              <legend><span>4</span> Монтаж</legend>
+              <div class="opts opts--3" id="cMount">
+                <label><input type="radio" name="mount" value="surface" checked><span><b>Накладной</b>На фасад или в проём</span></label>
+                <label><input type="radio" name="mount" value="inset"><span><b>Встроенный</b>Направляющие в откосах</span></label>
+                <label><input type="radio" name="mount" value="hidden"><span><b>Скрытый</b>Короб в фасаде</span></label>
+              </div>
+            </fieldset>
+          </div>
+
+          <aside class="cfg__sum" aria-live="polite">
+            <div class="cfg__preview" aria-hidden="true"><div class="cfg__win"><div class="cfg__cloth" id="cfgCloth"></div></div></div>
+            <ul class="cfg__lines" id="cfgLines"></ul>
+            <div class="cfg__total">
+              <span>Итого от</span>
+              <output id="cfgTotal">—</output>
+            </div>
+            <button class="btn btn--brass btn--lg btn--block" type="button" id="cfgSend">Зафиксировать цену на замере</button>
+            <p class="fine">Без предоплаты. Замерщик привезёт образцы тканей.</p>
+          </aside>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== PROCESS ===== -->
+    <section class="sec sec--sand" id="process">
+      <div class="wrap">
+        <header class="sec__head reveal">
+          <p class="kicker">Как работаем</p>
+          <h2>От заявки до прохлады — пять шагов</h2>
+        </header>
+        <ol class="flow">
+          <li class="reveal"><span class="flow__n">01</span><h3>Заявка</h3><p>Звонок, мессенджер или форма на сайте. Отвечаем за 15 минут.</p></li>
+          <li class="reveal"><span class="flow__n">02</span><h3>Замер</h3><p>Бесплатно, в удобное время. Привозим образцы тканей и цвета профиля.</p></li>
+          <li class="reveal"><span class="flow__n">03</span><h3>Договор</h3><p>Фиксируем цену, сроки и гарантию. Без скрытых доплат.</p></li>
+          <li class="reveal"><span class="flow__n">04</span><h3>Производство</h3><p>Изготовление по точным размерам вашего проёма.</p></li>
+          <li class="reveal"><span class="flow__n">05</span><h3>Монтаж</h3><p>Установка за день, настройка автоматики и инструктаж.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="sec" id="faq">
+      <div class="wrap faq">
+        <header class="sec__head reveal">
+          <p class="kicker">Вопросы</p>
+          <h2>Отвечаем честно</h2>
+          <p class="sec__sub">Не нашли ответ? <a href="#lead">Спросите нас напрямую</a>.</p>
+        </header>
+        <div class="faq__list">
+          <details><summary>Какой ветер выдержит ZIP-экран?</summary><p>Ткань в направляющих выдерживает значительно больше, чем обычная штора, но допустимая нагрузка зависит от размера и способа монтажа — её считаем при замере по EN 13561. С датчиком ветра экран поднимется сам, если станет слишком ветрено.</p></details>
+          <details><summary>Будет ли видно, что происходит на улице?</summary><p>Днём — да: при открытости 3–10% вы видите улицу, а снаружи вас почти не видно. Вечером при включённом свете эффект обратный — для полной приватности есть blackout.</p></details>
+          <details><summary>Можно ли установить на уже готовый дом?</summary><p>Да, для этого есть накладной и встроенный монтаж. Скрытый вариант, когда короб уходит в фасад, лучше закладывать на этапе строительства или ремонта.</p></details>
+          <details><summary>Сколько ждать от замера до монтажа?</summary><p>Обычно 2–4 недели, в разгар сезона дольше. Точный срок прописываем в договоре.</p></details>
+          <details><summary>Что если отключат электричество?</summary><p>Экран останется в том положении, где был. Для перголы без проводки есть привод с солнечной панелью и аккумулятором.</p></details>
+          <details><summary>Можно ли пользоваться зимой?</summary><p>Да, но при обледенении направляющих экран лучше не двигать. Ткань не боится мороза.</p></details>
+          <details><summary>Как ухаживать за тканью?</summary><p>Раз в сезон промыть мягкой щёткой с тёплой мыльной водой и дать высохнуть в опущенном положении. Химчистка не нужна.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LEAD ===== -->
+    <section class="lead" id="lead">
+      <div class="wrap lead__grid">
+        <div class="lead__copy">
+          <p class="kicker">Бесплатный замер</p>
+          <h2>Приедем, измерим, покажем ткани вживую</h2>
+          <p>Оставьте телефон — перезвоним в течение 15 минут в рабочее время и подберём удобное время замера.</p>
+          <ul class="lead__contacts">
+            <li><a href="tel:+70000000000">+7 (000) 000-00-00</a></li>
+            <li><a href="https://wa.me/70000000000" target="_blank" rel="noopener">WhatsApp</a> · <a href="https://t.me/" target="_blank" rel="noopener">Telegram</a></li>
+            <li>Пн–Сб, 9:00–20:00</li>
+          </ul>
+        </div>
+        <form class="lf" id="leadForm" novalidate>
+          <div class="field">
+            <label for="lfName">Как к вам обращаться</label>
+            <input id="lfName" name="name" autocomplete="name" aria-describedby="lfNameErr">
+            <p class="field__err" id="lfNameErr"></p>
+          </div>
+          <div class="field">
+            <label for="lfPhone">Телефон <abbr title="обязательно">*</abbr></label>
+            <input id="lfPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7 (900) 000-00-00" aria-describedby="lfPhoneErr" required>
+            <p class="field__err" id="lfPhoneErr"></p>
+          </div>
+          <fieldset class="field field--row">
+            <legend>Где удобнее ответить</legend>
+            <label><input type="radio" name="via" value="Звонок" checked> Звонок</label>
+            <label><input type="radio" name="via" value="WhatsApp"> WhatsApp</label>
+            <label><input type="radio" name="via" value="Telegram"> Telegram</label>
+          </fieldset>
+          <div class="field">
+            <label for="lfNote">Комментарий</label>
+            <textarea id="lfNote" name="note" rows="3" placeholder="Например: терраса 6 × 2,5 м, нужен датчик ветра"></textarea>
+          </div>
+          <label class="agree"><input type="checkbox" name="agree" id="lfAgree"> <span>Согласен с <a href="privacy.html">политикой обработки персональных данных</a></span></label>
+          <p class="field__err" id="lfAgreeErr"></p>
+          <button class="btn btn--brass btn--lg btn--block" type="submit" id="lfBtn">Записаться на замер</button>
+          <p class="lf__status" id="lfStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ftr">
+    <div class="wrap ftr__grid">
+      <div>
+        <a class="brand brand--light" href="#top">
+          <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="4" width="26" height="5" rx="1.5"/><path d="M6 9v19M26 9v19" stroke-width="2.4"/><rect class="brand__cloth" x="8" y="9" width="16" height="14"/></svg>
+          <span class="brand__name">ЗИП <em>ЛЮКС</em></span>
+        </a>
+        <p>Продажа, монтаж и сервис ZIP-систем ALUTECH для частных домов, террас и бизнеса.</p>
+      </div>
+      <nav aria-label="Разделы сайта">
+        <a href="#solutions">Решения</a><a href="#compare">Почему ZIP</a><a href="#tech">Технология</a><a href="#config">Конфигуратор</a><a href="#faq">Вопросы</a>
+      </nav>
+      <address>
+        <a class="ftr__phone" href="tel:+70000000000">+7 (000) 000-00-00</a>
+        <a href="mailto:info@example.com">info@example.com</a>
+        <span>г. Ваш город, ул. Примерная, 1</span>
+      </address>
+    </div>
+    <div class="wrap ftr__legal">
+      <span>© <span id="yr">2026</span> ЗИП ЛЮКС</span>
+      <span>ALUTECH — товарный знак правообладателя. Сайт не является официальным сайтом производителя.</span>
+      <a href="privacy.html">Политика конфиденциальности</a>
+    </div>
+  </footer>
+
+  <!-- sticky mobile action bar -->
+  <div class="mbar" aria-label="Быстрая связь">
+    <a href="tel:+70000000000" class="mbar__btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Позвонить</a>
+    <a href="#lead" class="mbar__btn mbar__btn--brass">Бесплатный замер</a>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
