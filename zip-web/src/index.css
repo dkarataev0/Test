@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Design tokens — UI UX Pro Max: Bento Box Grid + Soft UI, nature green + sun amber */
+@theme {
+  --color-canvas: #f4f4f0;
+  --color-card: #ffffff;
+  --color-ink: #12201a;
+  --color-ink-2: #3d4a43;
+  --color-ink-3: #5f6b64;
+  --color-line: #e3e5de;
+  --color-brand: #15803d;
+  --color-brand-deep: #0f5f2d;
+  --color-brand-soft: #e3f1e7;
+  --color-sun: #d97706;
+  --color-sun-soft: #fdf0dc;
+  --color-night: #10241a;
+  --color-danger: #b42318;
+
+  --font-display: "Wix Madefor Display", system-ui, sans-serif;
+  --font-sans: "Wix Madefor Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-bento: 28px;
+  --shadow-soft: 0 1px 2px rgb(18 32 26 / 0.04), 0 8px 24px rgb(18 32 26 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(18 32 26 / 0.05), 0 24px 48px rgb(18 32 26 / 0.12);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; -webkit-text-size-adjust: 100%; }
+  body { @apply bg-canvas text-ink font-sans antialiased; font-size: 16px; line-height: 1.6; }
+  h1, h2, h3 { @apply font-display text-balance; letter-spacing: -0.025em; }
+  :focus-visible { outline: 3px solid var(--color-brand); outline-offset: 3px; border-radius: 8px; }
+  ::selection { background: var(--color-brand-soft); }
+}
+
+@utility container-x {
+  width: min(1200px, 100% - 32px);
+  margin-inline: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
