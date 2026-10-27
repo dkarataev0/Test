@@ -5,6 +5,7 @@
 """
 from .config import niche_of
 from .models import Company
+from .outreach import after_reply, first_message
 
 
 def quoted(name: str) -> str:
@@ -64,7 +65,7 @@ def prepositional(city: str) -> str:
     return city
 
 
-def build_messages(c: Company, city: str) -> list[dict]:
+def build_messages(c: Company, city: str, seed: int = 0) -> list[dict]:
     city = c.city or city
     where = prepositional(city)
     short, long = _situation(c)
@@ -73,12 +74,6 @@ def build_messages(c: Company, city: str) -> list[dict]:
     benefit = BENEFITS[niche]
     hint = SEARCH_HINT[niche].format(city=city, category_low=c.category.lower())
 
-    whatsapp = (
-        f"Здравствуйте! Меня зовут [Ваше имя], я делаю сайты для бизнеса в {where}.\n"
-        f"Увидел {q} на карте - {short}. "
-        f"Набросал бесплатно, как мог бы выглядеть ваш сайт: {benefit}.\n"
-        "Можно отправлю макет сюда? Ни к чему не обязывает 🙂"
-    )
     email_subject = f"Макет сайта для {q} - бесплатно"
     email = (
         "Здравствуйте!\n\n"
@@ -113,30 +108,14 @@ def build_messages(c: Company, city: str) -> list[dict]:
         f"Здравствуйте! Напоминаю о себе - [Ваше имя], писал про сайт для {q}. "
         "Удалось посмотреть макет? Если есть пожелания - поправлю под вас бесплатно."
     )
-    telegram = (
-        f"Добрый день! Я [Ваше имя], делаю сайты для бизнеса в {where}.\n"
-        f"Посмотрел карточку {q} на картах: {short}. "
-        f"Сделал для вас бесплатный макет: {benefit}.\n"
-        "Скинуть сюда ссылку? Посмотреть можно с телефона за минуту."
-    )
-    page = "вашу страницу" if c.socials else "вас"
-    vk = (
-        f"Здравствуйте! Нашёл {page} во ВКонтакте и решил написать.\n"
-        f"Меня зовут [Ваше имя], я делаю сайты для бизнеса в {where}. "
-        f"Новые клиенты чаще ищут в Яндексе, по запросам вроде {hint}, а там {q} пока почти не видно.\n"
-        f"Я подготовил бесплатный макет сайта для вас: {benefit}. Прислать ссылку?"
-    )
-    instagram = (
-        f"Здравствуйте! Очень нравится ваша страница 🙌\n"
-        f"Я [Ваше имя], делаю сайты для бизнеса в {where}. Сделал для {q} макет сайта, "
-        "куда можно вести клиентов из профиля: цены, запись и контакты в одном месте.\n"
-        "Пришлю ссылку посмотреть? Это бесплатно."
-    )
+    # Мессенджеры: короткие уникальные сообщения без ссылок (см. outreach.py)
+    chat = {ch: first_message(c, city, where, seed, ch) for ch in ("whatsapp", "telegram", "vk", "instagram")}
     return [
-        {"channel": "whatsapp", "title": "WhatsApp", "text": whatsapp},
-        {"channel": "telegram", "title": "Telegram", "text": telegram},
-        {"channel": "vk", "title": "ВКонтакте", "text": vk},
-        {"channel": "instagram", "title": "Instagram", "text": instagram},
+        {"channel": "whatsapp", "title": "WhatsApp", "text": chat["whatsapp"]},
+        {"channel": "telegram", "title": "Telegram", "text": chat["telegram"]},
+        {"channel": "vk", "title": "ВКонтакте", "text": chat["vk"]},
+        {"channel": "instagram", "title": "Instagram", "text": chat["instagram"]},
+        {"channel": "after_reply", "title": "После ответа: макет", "text": after_reply(c, seed)},
         {"channel": "email", "title": "Письмо", "subject": email_subject, "text": email},
         {"channel": "call", "title": "Скрипт звонка", "text": call},
         {"channel": "followup", "title": "Напоминание через 3 дня", "text": follow_up},

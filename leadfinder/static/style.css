@@ -369,3 +369,19 @@ legend { margin-bottom: 10px; color: var(--muted); font-size: 13px; font-weight:
 @keyframes nudge { 0%, 85%, 100% { transform: none; } 90% { transform: rotate(-4deg); } 95% { transform: rotate(4deg); } }
 .panel h4 .since { margin-left: 8px; color: var(--dim); font-weight: 500; font-size: 12.5px; }
 .followup-tip { margin: -2px 0 12px; background: #FEF3DC; color: #92400E; }
+
+/* Безопасность аккаунта */
+.safety { border-radius: var(--radius); padding: 14px 16px; border: 1px solid #CDEBDD; background: #F1FAF5; display: grid; gap: 8px; }
+.safety.warn { border-color: #FBE2B4; background: #FFF8EC; }
+.safety.danger { border-color: #FFC7D3; background: #FFF1F4; }
+.safety-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.safety-top > b { display: inline-flex; gap: 8px; align-items: center; }
+.safety p { font-size: 13.5px; color: var(--muted); }
+.safety .progress { height: 6px; background: rgba(0,0,0,.06); }
+.safety.ok .progress i { background: var(--green); }
+.safety.warn .progress i { background: #F59E0B; }
+.safety.danger .progress i { background: var(--rose); }
+.safety summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--violet); }
+.safety ul { margin: 8px 0 0 18px; display: grid; gap: 6px; font-size: 13.5px; color: var(--ink); }
+.ai-btn { color: var(--violet); border-color: var(--lavender-2); }
+.ai-mark { display: block; margin-top: 10px; font-size: 12px; color: var(--violet); font-weight: 600; }

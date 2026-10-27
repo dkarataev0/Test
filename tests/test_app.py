@@ -25,8 +25,8 @@ def test_detail_messages_mockup_status(client):
     client.post("/api/demo")
     cid = client.get("/api/companies").json()[0]["id"]
     d = client.get(f"/api/companies/{cid}").json()
-    assert {m["channel"] for m in d["messages"]} == {"whatsapp", "telegram", "vk", "instagram", "email", "call", "followup"}
-    assert d["name"] in d["messages"][0]["text"]
+    assert {m["channel"] for m in d["messages"]} == {"whatsapp", "telegram", "vk", "instagram", "after_reply", "email", "call", "followup"}
+    assert "[Ваше имя]" in d["messages"][0]["text"]
 
     for v in range(3):
         html = client.get(f"/mockup/{cid}", params={"variant": v}).text
@@ -217,3 +217,40 @@ def test_followup_after_three_days(tmp_path):
     assert c.get("/api/meta").json()["followup"] == 1
     c.patch("/api/companies/demo1", json={"status": "replied"})
     assert c.get("/api/meta").json()["followup"] == 0
+
+
+def test_ai_message_without_key_is_clear_error(client, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    client.post("/api/demo")
+    assert client.get("/api/meta").json()["ai"] is False
+    r = client.post("/api/companies/demo1/ai-message", json={"channel": "telegram"})
+    assert r.status_code == 503 and "ANTHROPIC_API_KEY" in r.json()["detail"]
+    assert client.post("/api/companies/demo1/ai-message", json={"channel": "email"}).status_code == 400
+
+
+def test_ai_message_uses_writer(client, monkeypatch):
+    from leadfinder import ai
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
+    seen = {}
+
+    async def fake(c, city, channel, previous=None):
+        seen.update(name=c.name, channel=channel, previous=previous)
+        return "Здравствуйте! Я [Ваше имя]. Показать макет?"
+
+    monkeypatch.setattr(ai, "write_first_message", fake)
+    client.post("/api/demo")
+    r = client.post("/api/companies/demo1/ai-message", json={"channel": "vk", "previous": "старый"})
+    assert r.json()["text"].endswith("?") and seen["channel"] == "vk" and seen["previous"] == "старый"
+
+
+def test_seed_changes_chat_messages(client):
+    client.post("/api/demo")
+    a = client.get("/api/companies/demo1", params={"seed": 0}).json()["messages"]
+    texts = {client.get("/api/companies/demo1", params={"seed": s}).json()["messages"][1]["text"] for s in range(5)}
+    assert len(texts) > 1 and a[1]["text"] in texts
+
+
+def test_ai_clean_removes_links_and_long_dashes():
+    from leadfinder.ai import _clean
+    out = _clean("«Привет " + chr(0x2014) + " смотрите https://spam.example сайт»")
+    assert "http" not in out and chr(0x2014) not in out

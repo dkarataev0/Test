@@ -222,6 +222,7 @@ async function openCompany(id) {
   state.current = await api(`/api/companies/${encodeURIComponent(id)}`);
   state.tab = "overview";
   state.channel = "all";
+  state.aiTexts = {};
   state.variant = defaultVariant(id);
   const c = state.current;
   $("#d-meta").innerHTML = `<span class="cat"><span class="cat-ic">${icon(c.niche, 14)}</span>${esc(c.category)}</span>${kindBadge({ ...c, score: c.audit?.score })}${c.demo ? '<span class="badge unchecked">демо</span>' : ""}`;
@@ -341,6 +342,7 @@ const NETS = {
   email: { color: "#6D28D9", icon: "mail" },
   call: { color: "#059669", icon: "phone" },
   followup: { color: "#9A93B3", icon: "clock" },
+  after_reply: { color: "#6D28D9", icon: "link" },
 };
 
 function channelInfo(channel, c, text, subject) {
@@ -368,6 +370,10 @@ function channelInfo(channel, c, text, subject) {
         href: c.email ? `mailto:${c.email}?subject=${encodeURIComponent(subject || "")}&body=${encodeURIComponent(text)}` : null, label: "Отправить письмо" };
     case "call":
       return { has: !!d, note: c.phone || "Телефона нет в данных", href: d ? `tel:+${d}` : null, label: "Позвонить" };
+    case "after_reply":
+      return { has: !!(s.telegram || mobile), note: "Отправьте, когда клиент ответил. Ссылку на макет можно только сейчас",
+        href: s.telegram || (mobile ? `https://wa.me/${d}?text=${encodeURIComponent(text)}` : null),
+        label: s.telegram ? "Открыть чат" : "В WhatsApp", copyFirst: !!s.telegram };
     default:
       return { has: true, note: "Если не ответили за 3 дня", href: mobile ? `https://wa.me/${d}?text=${encodeURIComponent(text)}` : null, label: "В WhatsApp" };
   }
@@ -378,33 +384,111 @@ function netMark(channel) {
   return `<span class="net" style="background:${n.color}">${n.icon ? icon(n.icon, 14) : n.mark}</span>`;
 }
 
+// Первые сообщения в мессенджерах: их считаем для дневного лимита
+const FIRST_TOUCH = ["whatsapp", "telegram", "vk", "instagram"];
+const SENT_KEY = "leadfinder.sent";
+const today = () => new Date().toISOString().slice(0, 10);
+function sentStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SENT_KEY)) || {};
+    return s.date === today() ? s : { date: today(), count: 0, last: s.last || 0 };
+  } catch { return { date: today(), count: 0, last: 0 }; }
+}
+function registerSent(net) {
+  if (!FIRST_TOUCH.includes(net)) return;
+  const s = sentStats();
+  s.count += 1; s.last = Date.now();
+  try { localStorage.setItem(SENT_KEY, JSON.stringify(s)); } catch {}
+}
+
+// Итоговый текст сообщения: ИИ-вариант (если есть), подставленные данные и ссылка на макет
+function finalText(i) {
+  const c = state.current, msg = c.messages[i];
+  const raw = state.aiTexts?.[msg.channel] || msg.text;
+  const mockUrl = `${location.origin}/mockup/${encodeURIComponent(c.id)}`;
+  return fillPlaceholders(raw).replaceAll("[Ссылка на макет]", mockUrl);
+}
+
+function safetyPanel() {
+  const me = loadSettings(), s = sentStats();
+  const limit = +me.limit || 20;
+  const pct = Math.min(100, Math.round(s.count / limit * 100));
+  const mins = s.last ? Math.floor((Date.now() - s.last) / 60000) : null;
+  const over = s.count >= limit;
+  const pause = mins !== null && mins < 3;
+  const state_ = over ? "danger" : pause ? "warn" : "ok";
+  const note = over ? "Лимит на сегодня исчерпан. Новые диалоги лучше начать завтра, иначе Telegram может ограничить аккаунт."
+    : pause ? `Последнее сообщение было ${mins < 1 ? "меньше минуты" : mins + " мин."} назад. Сделайте паузу 3-5 минут.`
+    : mins !== null ? `С последнего сообщения прошло ${mins} мин. Можно писать следующему.` : "Сегодня вы ещё не писали.";
+  return `<div class="safety ${state_}">
+    <div class="safety-top"><b>${icon("info", 15)}Безопасность аккаунта</b><span>Новых диалогов сегодня: <b>${s.count}</b> из ${limit}</span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    <p>${note}</p>
+    <details><summary>Как не попасть в спам</summary><ul>
+      <li>Первое сообщение без ссылок. Макет отправляйте вторым, когда человек ответил.</li>
+      <li>Не больше ${limit} новых диалогов в день и пауза 3-5 минут между ними. Новому аккаунту лучше начинать с 5-10.</li>
+      <li>Каждый текст отличается: жмите «Другой вариант» или «С ИИ», не копируйте одно и то же.</li>
+      <li>Пишите тем, у кого контакт указан публично для клиентов, и в рабочее время, с 10 до 19.</li>
+      <li>Заполненный профиль: фото, имя, описание «Делаю сайты» и ссылка на портфолио в профиле, а не в сообщении.</li>
+      <li>Если просят не писать, извинитесь и поставьте статус «Отказ».</li>
+    </ul></details>
+  </div>`;
+}
+
 function renderMessages() {
   const c = state.current, me = loadSettings();
   const pick = state.channel || "all";
   const chips = [`<button data-channel="all" class="${pick === "all" ? "active" : ""}">Все</button>`].concat(c.messages.map(m => {
     const info = channelInfo(m.channel, c, "", m.subject);
-    return `<button data-channel="${m.channel}" class="${pick === m.channel ? "active" : ""}">${netMark(m.channel)}${esc(m.title.replace(" через 3 дня", ""))}<span class="has ${info.has ? "" : "no"}" title="${info.has ? "Контакт есть" : "Контакта нет"}"></span></button>`;
+    return `<button data-channel="${m.channel}" class="${pick === m.channel ? "active" : ""}">${netMark(m.channel)}${esc(m.title.replace(" через 3 дня", "").replace("После ответа: макет", "Макет после ответа"))}<span class="has ${info.has ? "" : "no"}" title="${info.has ? "Контакт есть" : "Контакта нет"}"></span></button>`;
   }));
-  const head = `<div class="channels" role="tablist" aria-label="Канал">${chips.join("")}</div>` +
+  const head = safetyPanel() + `<div class="channels" role="tablist" aria-label="Канал">${chips.join("")}</div>` +
     (!me.name ? `<p class="hint">${icon("info", 14)}<span>Укажите своё имя и телефон, они подставятся в тексты. <a data-action="settings">Заполнить</a></span></p>` : "");
   const blocks = c.messages.map((msg, i) => {
     if (pick !== "all" && pick !== msg.channel) return "";
-    const text = fillPlaceholders(msg.text);
+    const text = finalText(i);
     const info = channelInfo(msg.channel, c, text, msg.subject);
     const actions = [`<button class="btn btn-ghost btn-sm" data-copy-msg="${i}">${icon("copy", 14)}Копировать</button>`];
+    if (FIRST_TOUCH.includes(msg.channel)) {
+      actions.unshift(`<button class="btn btn-ghost btn-sm" data-reshuffle title="Собрать другой текст">${icon("radar", 14)}Другой вариант</button>`);
+      if (state.meta.ai) actions.unshift(`<button class="btn btn-ghost btn-sm ai-btn" data-ai="${msg.channel}" title="Claude напишет текст под эту компанию">✦ С ИИ</button>`);
+    }
     if (info.href) {
       const kind = info.has ? "btn-primary" : "btn-ghost";
       const ext = info.href.startsWith("http") ? 'target="_blank" rel="noopener"' : "";
-      actions.push(`<a class="btn ${kind} btn-sm" data-sent ${info.copyFirst ? `data-copy-msg="${i}"` : ""} ${ext} href="${esc(info.href)}">${icon("send", 14)}${esc(info.label)}</a>`);
+      actions.push(`<a class="btn ${kind} btn-sm" data-sent data-net="${msg.channel}" ${info.copyFirst ? `data-copy-msg="${i}"` : ""} ${ext} href="${esc(info.href)}">${icon("send", 14)}${esc(info.label)}</a>`);
     }
+    const aiMark = state.aiTexts?.[msg.channel] ? '<span class="ai-mark">написано ИИ, проверьте перед отправкой</span>' : "";
     return `<div class="msg">
       <div class="msg-head"><b>${netMark(msg.channel)}<span>${esc(msg.title)}<small>${esc(info.note)}</small></span></b><div class="msg-actions">${actions.join("")}</div></div>
       ${msg.subject ? `<div class="msg-subject">Тема: <b>${esc(msg.subject)}</b></div>` : ""}
-      <div class="msg-text">${highlight(text)}</div>
+      <div class="msg-text">${highlight(text)}${aiMark}</div>
     </div>`;
   }).join("");
   const tip = `<p class="hint">${icon("info", 14)}Для Telegram, ВКонтакте и Instagram текст копируется автоматически: откройте чат и вставьте его.</p>`;
   return head + blocks + tip;
+}
+
+async function reshuffle() {
+  const c = state.current;
+  const seed = ((c.seed || 0) + 1) % 1000;
+  const fresh = await api(`/api/companies/${encodeURIComponent(c.id)}?seed=${seed}`);
+  state.current = fresh; state.aiTexts = {};
+  renderTab();
+}
+
+async function aiWrite(btn, channel) {
+  const c = state.current, i = c.messages.findIndex(m => m.channel === channel);
+  btn.disabled = true; btn.textContent = "Пишу…";
+  try {
+    const r = await api(`/api/companies/${encodeURIComponent(c.id)}/ai-message`, {
+      method: "POST", body: JSON.stringify({ channel, previous: state.aiTexts?.[channel] || c.messages[i].text }),
+    });
+    state.aiTexts = { ...(state.aiTexts || {}), [channel]: r.text };
+    renderTab();
+  } catch (err) {
+    toast(err.message); btn.disabled = false; btn.textContent = "✦ С ИИ";
+  }
 }
 
 function renderMockup() {
@@ -618,7 +702,7 @@ function bind() {
   });
 
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-kind], .company, [data-action], [data-copy], [data-copy-msg], [data-status], [data-channel], [data-variant], [data-device], .tabs button");
+    const t = e.target.closest("[data-kind], .company, [data-action], [data-copy], [data-copy-msg], [data-reshuffle], [data-ai], [data-status], [data-channel], [data-variant], [data-device], .tabs button");
     if (!t) return;
     if (t.matches(".stat, #kind-filter button")) {
       const deal = t.dataset.kind === "deal";
@@ -636,11 +720,13 @@ function bind() {
     }
     if (t.dataset.copy !== undefined) { e.preventDefault(); e.stopPropagation(); copy(t.dataset.copy); return; }
     if (t.dataset.copyMsg !== undefined) {
-      const msg = state.current.messages[+t.dataset.copyMsg];
-      copy(fillPlaceholders(msg.subject ? `${msg.subject}\n\n${msg.text}` : msg.text), "Текст скопирован");
-      if (t.hasAttribute("data-sent")) setStatus("contacted");
+      const i = +t.dataset.copyMsg, msg = state.current.messages[i];
+      copy(msg.subject ? `${msg.subject}\n\n${finalText(i)}` : finalText(i), "Текст скопирован");
+      if (t.hasAttribute("data-sent")) { registerSent(t.dataset.net); setStatus("contacted"); }
       return;
     }
+    if (t.hasAttribute("data-reshuffle")) { reshuffle().catch(err => toast(err.message)); return; }
+    if (t.dataset.ai) { aiWrite(t, t.dataset.ai); return; }
     if (t.dataset.status) { setStatus(t.dataset.status); return; }
     if (t.dataset.channel) { state.channel = t.dataset.channel; renderTab(); return; }
     if (t.dataset.variant) { state.variant = +t.dataset.variant; renderTab(); return; }
@@ -650,7 +736,7 @@ function bind() {
   // отметка «Написал» при отправке через мессенджер/почту
   document.addEventListener("click", e => {
     const a = e.target.closest("a[data-sent]:not([data-copy-msg])");
-    if (a) setStatus("contacted");
+    if (a) { registerSent(a.dataset.net); setStatus("contacted"); }
   }, true);
 
   let noteTimer;
@@ -683,7 +769,7 @@ function bind() {
   $("#settings-form").addEventListener("submit", () => {
     const f = new FormData($("#settings-form"));
     saveSettings({ name: f.get("name").trim(), phone: f.get("phone").trim(), portfolio: f.get("portfolio").trim(),
-      price: f.get("price").replace(/[^\d ]/g, "").trim() });
+      price: f.get("price").replace(/[^\d ]/g, "").trim(), limit: Math.max(1, Math.min(100, +f.get("limit") || 20)) });
     toast("Данные сохранены");
     if (state.current && state.tab === "messages") renderTab();
   });
@@ -691,7 +777,7 @@ function bind() {
 function openSettings() {
   const me = loadSettings(), f = $("#settings-form");
   $("#btn-logout").hidden = !state.meta?.auth;
-  f.name.value = me.name || ""; f.phone.value = me.phone || ""; f.portfolio.value = me.portfolio || ""; f.price.value = me.price || "";
+  f.name.value = me.name || ""; f.phone.value = me.phone || ""; f.portfolio.value = me.portfolio || ""; f.price.value = me.price || ""; f.limit.value = me.limit || 20;
   $("#settings-dialog").showModal();
 }
 

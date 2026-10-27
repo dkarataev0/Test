@@ -10,12 +10,12 @@ import logging
 import os
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import audit, osm
+from . import ai, audit, osm
 from .config import CITY, DB_PATH, NICHES, REGIONS, ROOT
 from .messages import build_messages
 from .mockup import THEMES, render_mockup
@@ -47,6 +47,11 @@ class ImportRequest(BaseModel):
 class UpdateRequest(BaseModel):
     status: str | None = None
     note: str | None = None
+
+
+class AIMessageRequest(BaseModel):
+    channel: str = "telegram"
+    previous: str | None = Field(None, max_length=2000)
 
 
 class LoginRequest(BaseModel):
@@ -248,6 +253,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             "demo": any(c.demo for c in items),
             "pending_audit": sum(1 for c in items if c.website and c.kind == "unchecked"),
             "auth": bool(password),
+            "ai": ai.enabled(),
         }
 
     @app.post("/api/demo")
@@ -290,13 +296,26 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return {"deleted": store.delete_new()}
 
     @app.get("/api/companies/{cid}")
-    def company(cid: str):
+    def company(cid: str, seed: int = Query(0, ge=0, le=1000)):
         c = store.get(cid)
         if not c:
             raise HTTPException(404, "Компания не найдена")
         log_ = status_log()
-        return {**c.model_dump(), "priority": c.priority, "messages": build_messages(c, CITY),
+        return {**c.model_dump(), "priority": c.priority, "messages": build_messages(c, CITY, seed), "seed": seed,
                 "status_at": log_.get(c.id), "followup": followup_due(c, log_)}
+
+    @app.post("/api/companies/{cid}/ai-message")
+    async def ai_message(cid: str, req: AIMessageRequest):
+        c = store.get(cid)
+        if not c:
+            raise HTTPException(404, "Компания не найдена")
+        if req.channel not in ai.CHANNEL:
+            raise HTTPException(400, "ИИ пишет только сообщения для мессенджеров")
+        try:
+            text = await ai.write_first_message(c, c.city or CITY, req.channel, req.previous)
+        except ai.AIUnavailable as exc:
+            raise HTTPException(503, str(exc))
+        return {"text": text}
 
     @app.patch("/api/companies/{cid}")
     def update(cid: str, req: UpdateRequest):
