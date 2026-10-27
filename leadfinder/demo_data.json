@@ -1,0 +1,502 @@
+[
+ {
+  "id": "demo1",
+  "name": "Студия красоты «Лаванда»",
+  "niche": "beauty",
+  "category": "Салон красоты",
+  "address": "ул. Уральская, 40",
+  "phone": "+7 900 000-00-01",
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": "24/7",
+  "lat": 45.04406,
+  "lon": 38.94079,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo2",
+  "name": "Барбершоп «Борода»",
+  "niche": "beauty",
+  "category": "Парикмахерская",
+  "address": "ул. Садовая, 26",
+  "phone": "+7 900 000-00-02",
+  "email": null,
+  "website": null,
+  "socials": {
+   "instagram": "https://instagram.com/boroda_demo"
+  },
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.03997,
+  "lon": 39.00778,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo3",
+  "name": "Стоматология «Улыбка+»",
+  "niche": "beauty",
+  "category": "Стоматология",
+  "address": "ул. Тургенева, 11",
+  "phone": "+7 900 000-00-03",
+  "email": null,
+  "website": "http://demo3.example",
+  "socials": {},
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa-Su 10:00-18:00",
+  "lat": 45.03102,
+  "lon": 38.94059,
+  "kind": "bad_site",
+  "audit": {
+   "score": 60,
+   "reachable": true,
+   "final_url": "http://demo3.example",
+   "load_time": 4.3,
+   "issues": [
+    "Сайт долго загружается (5.8 с)",
+    "Устаревшие технологии вёрстки",
+    "Сайт не адаптирован под телефоны"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo4",
+  "name": "Массажный кабинет «Релакс»",
+  "niche": "beauty",
+  "category": "Массаж",
+  "address": "ул. Гимназическая, 17",
+  "phone": "+7 900 000-00-04",
+  "email": "info@demo4.example",
+  "website": null,
+  "socials": {},
+  "opening_hours": null,
+  "lat": 45.04013,
+  "lon": 38.93897,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo5",
+  "name": "Парикмахерская «Локон»",
+  "niche": "beauty",
+  "category": "Парикмахерская",
+  "address": "ул. Тургенева, 13",
+  "phone": null,
+  "email": null,
+  "website": null,
+  "socials": {
+   "vk": "https://vk.com/lokon_demo"
+  },
+  "opening_hours": null,
+  "lat": 45.05651,
+  "lon": 38.95817,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo6",
+  "name": "Фитнес-клуб «Энергия»",
+  "niche": "beauty",
+  "category": "Фитнес",
+  "address": "ул. Ставропольская, 140",
+  "phone": "+7 900 000-00-06",
+  "email": null,
+  "website": "https://demo6.example",
+  "socials": {},
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa-Su 10:00-18:00",
+  "lat": 45.03925,
+  "lon": 38.97982,
+  "kind": "ok",
+  "audit": {
+   "score": 90,
+   "reachable": true,
+   "final_url": "https://demo6.example",
+   "load_time": 1.1,
+   "issues": [
+    "Нет иконки сайта во вкладке браузера"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo7",
+  "name": "Кофейня «Зерно»",
+  "niche": "food",
+  "category": "Кафе",
+  "address": "ул. Ставропольская, 28",
+  "phone": "+7 900 000-00-07",
+  "email": null,
+  "website": null,
+  "socials": {
+   "instagram": "https://instagram.com/zerno_demo",
+   "telegram": "https://t.me/zerno_demo"
+  },
+  "opening_hours": null,
+  "lat": 45.03927,
+  "lon": 38.95003,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo8",
+  "name": "Пекарня «Хлебный дом»",
+  "niche": "food",
+  "category": "Пекарня",
+  "address": "ул. Северная, 142",
+  "phone": "+7 900 000-00-08",
+  "email": "info@demo8.example",
+  "website": null,
+  "socials": {},
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa-Su 10:00-18:00",
+  "lat": 45.03886,
+  "lon": 38.98452,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo9",
+  "name": "Кафе «У Ашота»",
+  "niche": "food",
+  "category": "Кафе",
+  "address": "ул. Кожевенная, 176",
+  "phone": "+7 900 000-00-09",
+  "email": null,
+  "website": "http://demo9.example",
+  "socials": {},
+  "opening_hours": null,
+  "lat": 45.03066,
+  "lon": 38.96013,
+  "kind": "bad_site",
+  "audit": {
+   "score": 0,
+   "reachable": false,
+   "final_url": "http://demo9.example",
+   "load_time": null,
+   "issues": [
+    "Сайт не открывается"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo10",
+  "name": "Шаурма «Восток»",
+  "niche": "food",
+  "category": "Фастфуд",
+  "address": "ул. Садовая, 128",
+  "phone": null,
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.04877,
+  "lon": 38.95804,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo11",
+  "name": "Кондитерская «Медовик»",
+  "niche": "food",
+  "category": "Кондитерская",
+  "address": "ул. Северная, 32",
+  "phone": "+7 900 000-00-11",
+  "email": null,
+  "website": "http://demo11.example",
+  "socials": {},
+  "opening_hours": null,
+  "lat": 45.03009,
+  "lon": 38.99557,
+  "kind": "bad_site",
+  "audit": {
+   "score": 50,
+   "reachable": true,
+   "final_url": "http://demo11.example",
+   "load_time": 4.1,
+   "issues": [
+    "Устаревшие технологии вёрстки",
+    "Сайт на бесплатном конструкторе, без своего домена",
+    "Сайт не адаптирован под телефоны"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo12",
+  "name": "Ресторан «Кубань»",
+  "niche": "food",
+  "category": "Ресторан",
+  "address": "ул. Уральская, 89",
+  "phone": "+7 900 000-00-12",
+  "email": "info@demo12.example",
+  "website": "https://demo12.example",
+  "socials": {},
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.04066,
+  "lon": 38.98139,
+  "kind": "ok",
+  "audit": {
+   "score": 85,
+   "reachable": true,
+   "final_url": "https://demo12.example",
+   "load_time": 1.1,
+   "issues": [
+    "Нет иконки сайта во вкладке браузера"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo13",
+  "name": "Автосервис «Гараж 23»",
+  "niche": "auto",
+  "category": "Автосервис",
+  "address": "ул. Северная, 25",
+  "phone": "+7 900 000-00-13",
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.03345,
+  "lon": 38.98813,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo14",
+  "name": "Шиномонтаж «Колесо»",
+  "niche": "auto",
+  "category": "Шиномонтаж",
+  "address": "ул. Красная, 81",
+  "phone": "+7 900 000-00-14",
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": null,
+  "lat": 45.06459,
+  "lon": 39.00075,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo15",
+  "name": "Автомойка «Блеск»",
+  "niche": "auto",
+  "category": "Автомойка",
+  "address": "ул. Московская, 100",
+  "phone": null,
+  "email": null,
+  "website": null,
+  "socials": {
+   "vk": "https://vk.com/blesk_demo"
+  },
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.00635,
+  "lon": 38.97194,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo16",
+  "name": "СТО «Мотор»",
+  "niche": "auto",
+  "category": "Автосервис",
+  "address": "ул. Ставропольская, 158",
+  "phone": "+7 900 000-00-16",
+  "email": "info@demo16.example",
+  "website": "http://demo16.example",
+  "socials": {},
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa-Su 10:00-18:00",
+  "lat": 45.03462,
+  "lon": 38.95246,
+  "kind": "bad_site",
+  "audit": {
+   "score": 50,
+   "reachable": true,
+   "final_url": "http://demo16.example",
+   "load_time": 3.5,
+   "issues": [
+    "Нет защищённого соединения (HTTPS) — браузер пишет «Не защищено»",
+    "Нет описания для Яндекса и Google",
+    "Сайт на бесплатном конструкторе, без своего домена",
+    "Устаревшие технологии вёрстки"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo17",
+  "name": "Ремонт телефонов «Фикс»",
+  "niche": "auto",
+  "category": "Ремонт телефонов",
+  "address": "ул. Садовая, 73",
+  "phone": "+7 900 000-00-17",
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": "Mo-Su 08:00-22:00",
+  "lat": 45.05416,
+  "lon": 39.00412,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo18",
+  "name": "Автозапчасти «Деталь»",
+  "niche": "auto",
+  "category": "Автозапчасти",
+  "address": "ул. Московская, 108",
+  "phone": "+7 900 000-00-18",
+  "email": null,
+  "website": "http://demo18.example",
+  "socials": {},
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.04596,
+  "lon": 38.96544,
+  "kind": "bad_site",
+  "audit": {
+   "score": 60,
+   "reachable": true,
+   "final_url": "http://demo18.example",
+   "load_time": 2.6,
+   "issues": [
+    "Нет защищённого соединения (HTTPS) — браузер пишет «Не защищено»",
+    "Сайт не адаптирован под телефоны",
+    "Сайт на бесплатном конструкторе, без своего домена"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo19",
+  "name": "Цветочная лавка «Флора»",
+  "niche": "services",
+  "category": "Цветы",
+  "address": "ул. Кожевенная, 152",
+  "phone": "+7 900 000-00-19",
+  "email": null,
+  "website": null,
+  "socials": {
+   "instagram": "https://instagram.com/flora_demo"
+  },
+  "opening_hours": "Mo-Su 08:00-22:00",
+  "lat": 45.02076,
+  "lon": 38.93533,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo20",
+  "name": "Ателье «Иголочка»",
+  "niche": "services",
+  "category": "Ателье",
+  "address": "ул. Кубанская Набережная, 138",
+  "phone": null,
+  "email": "info@demo20.example",
+  "website": null,
+  "socials": {},
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.04159,
+  "lon": 38.96049,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo21",
+  "name": "Ветклиника «Айболит»",
+  "niche": "services",
+  "category": "Ветклиника",
+  "address": "ул. Ставропольская, 178",
+  "phone": "+7 900 000-00-21",
+  "email": null,
+  "website": "http://demo21.example",
+  "socials": {},
+  "opening_hours": null,
+  "lat": 45.06201,
+  "lon": 38.9874,
+  "kind": "bad_site",
+  "audit": {
+   "score": 25,
+   "reachable": true,
+   "final_url": "http://demo21.example",
+   "load_time": 3.3,
+   "issues": [
+    "Сайт не адаптирован под телефоны",
+    "Устаревшие технологии вёрстки",
+    "Сайт долго загружается (5.8 с)",
+    "Нет описания для Яндекса и Google",
+    "Нет защищённого соединения (HTTPS) — браузер пишет «Не защищено»"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo22",
+  "name": "Зоомагазин «Хвостик»",
+  "niche": "services",
+  "category": "Зоомагазин",
+  "address": "ул. Тургенева, 19",
+  "phone": "+7 900 000-00-22",
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": "Mo-Su 08:00-22:00",
+  "lat": 45.03144,
+  "lon": 38.94379,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo23",
+  "name": "Юридическая консультация «Право»",
+  "niche": "services",
+  "category": "Юрист",
+  "address": "ул. Гимназическая, 15",
+  "phone": "+7 900 000-00-23",
+  "email": null,
+  "website": "http://demo23.example",
+  "socials": {},
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa-Su 10:00-18:00",
+  "lat": 45.00501,
+  "lon": 38.9471,
+  "kind": "bad_site",
+  "audit": {
+   "score": 60,
+   "reachable": true,
+   "final_url": "http://demo23.example",
+   "load_time": 3.2,
+   "issues": [
+    "Сайт давно не обновлялся (последний год на сайте — 2017)",
+    "Сайт долго загружается (5.8 с)",
+    "Сайт не адаптирован под телефоны"
+   ],
+   "checks": {}
+  }
+ },
+ {
+  "id": "demo24",
+  "name": "Фотостудия «Кадр»",
+  "niche": "services",
+  "category": "Фотостудия",
+  "address": "ул. Рашпилевская, 66",
+  "phone": "+7 900 000-00-24",
+  "email": "info@demo24.example",
+  "website": "https://demo24.example",
+  "socials": {},
+  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
+  "lat": 45.04114,
+  "lon": 38.97293,
+  "kind": "ok",
+  "audit": {
+   "score": 75,
+   "reachable": true,
+   "final_url": "https://demo24.example",
+   "load_time": 1.1,
+   "issues": [
+    "Нет иконки сайта во вкладке браузера"
+   ],
+   "checks": {}
+  }
+ }
+]

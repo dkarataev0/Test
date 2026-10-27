@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeadFinder — поиск клиентов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233B82F6'/%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M19 19l5 5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg></span>
+    <div><b>LeadFinder</b><small id="city-label">Краснодар</small></div>
+  </div>
+  <div class="top-actions">
+    <button class="btn btn-ghost icon-only" id="btn-settings" aria-label="Настройки" title="Мои данные для сообщений"></button>
+    <a class="btn btn-ghost" id="btn-export" href="/api/export.csv"><span data-icon="download"></span><span class="hide-sm">Экспорт</span></a>
+    <button class="btn btn-primary" id="btn-scan"><span data-icon="radar"></span>Найти<span class="hide-sm">&nbsp;клиентов</span></button>
+  </div>
+</header>
+
+<main class="container">
+  <div class="demo-banner" id="demo-banner" hidden>
+    <span data-icon="info"></span>
+    <span>Сейчас показаны <b>демо-данные</b> (вымышленные компании). Нажмите «Найти клиентов», чтобы загрузить реальные из OpenStreetMap.</span>
+  </div>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="toolbar">
+    <div class="search">
+      <span data-icon="search"></span>
+      <input id="q" type="search" placeholder="Поиск по названию, адресу, категории" aria-label="Поиск">
+    </div>
+    <div class="filters">
+      <div class="seg" id="kind-filter" role="tablist" aria-label="Тип"></div>
+      <select id="niche-filter" aria-label="Ниша"><option value="">Все ниши</option></select>
+      <select id="status-filter" aria-label="Статус"><option value="">Все статусы</option></select>
+    </div>
+  </section>
+
+  <p class="result-line" id="result-line"></p>
+  <section class="grid" id="grid" aria-live="polite"></section>
+
+  <section class="empty" id="empty" hidden>
+    <div class="empty-art">
+      <svg viewBox="0 0 120 120" width="120" height="120" fill="none"><circle cx="60" cy="60" r="56" stroke="currentColor" stroke-opacity=".15" stroke-width="2"/><circle cx="60" cy="60" r="36" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/><circle cx="60" cy="60" r="16" fill="#3B82F6" fill-opacity=".25" stroke="#3B82F6" stroke-width="2"/><circle cx="88" cy="34" r="5" fill="#F43F5E"/><circle cx="30" cy="80" r="4" fill="#F59E0B"/><circle cx="84" cy="88" r="3.5" fill="#10B981"/></svg>
+    </div>
+    <h2 id="empty-title">Пока никого не нашли</h2>
+    <p id="empty-text">Запустите поиск: соберу малый бизнес Краснодара из OpenStreetMap, проверю их сайты и покажу тех, кому нужен новый сайт.</p>
+    <div class="empty-actions" id="empty-actions">
+      <button class="btn btn-primary" data-action="scan"><span data-icon="radar"></span>Найти клиентов</button>
+      <button class="btn btn-ghost" data-action="demo">Посмотреть демо</button>
+    </div>
+  </section>
+</main>
+
+<!-- Карточка компании -->
+<div class="overlay" id="overlay" hidden></div>
+<aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="d-name">
+  <div class="drawer-head">
+    <div class="d-title">
+      <div class="d-meta" id="d-meta"></div>
+      <h2 id="d-name"></h2>
+      <p id="d-address"></p>
+    </div>
+    <button class="btn btn-ghost icon-only" id="d-close" aria-label="Закрыть"></button>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="overview" class="active">Обзор</button>
+    <button role="tab" data-tab="messages">Сообщения</button>
+    <button role="tab" data-tab="mockup">Макет сайта</button>
+  </nav>
+  <div class="drawer-body" id="d-body"></div>
+</aside>
+
+<!-- Диалог поиска -->
+<dialog id="scan-dialog" class="dialog">
+  <form method="dialog" id="scan-form">
+    <h2>Поиск клиентов</h2>
+    <p class="muted">Город: <b id="scan-city">Краснодар</b>. Источник: OpenStreetMap. Сетевые бренды пропускаю.</p>
+    <fieldset>
+      <legend>Ниши</legend>
+      <div class="check-chips" id="scan-niches"></div>
+    </fieldset>
+    <label class="switch"><input type="checkbox" id="scan-audit" checked><span></span>Проверять качество сайтов (дольше, но точнее)</label>
+    <div class="progress-box" id="scan-progress" hidden>
+      <div class="progress"><i id="scan-bar"></i></div>
+      <p id="scan-msg" class="muted"></p>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" id="scan-cancel">Закрыть</button>
+      <button type="submit" class="btn btn-primary" id="scan-start"><span data-icon="radar"></span>Начать поиск</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Настройки -->
+<dialog id="settings-dialog" class="dialog">
+  <form method="dialog" id="settings-form">
+    <h2>Мои данные</h2>
+    <p class="muted">Подставляются в шаблоны сообщений вместо [Ваше имя], [Ваш телефон], [Портфолио]. Хранятся только в этом браузере.</p>
+    <label class="field"><span>Ваше имя</span><input name="name" autocomplete="name" placeholder="Например, Дмитрий"></label>
+    <label class="field"><span>Телефон</span><input name="phone" autocomplete="tel" placeholder="+7 900 000-00-00"></label>
+    <label class="field"><span>Ссылка на портфолио</span><input name="portfolio" placeholder="https://..."></label>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" id="settings-cancel">Отмена</button>
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
