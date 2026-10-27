@@ -88,7 +88,7 @@ const state = { meta: null, items: [], filters: { kind: "leads", niche: "", stat
 const KIND_FILTERS = [["leads", "Клиенты"], ["no_site", "Нет сайта"], ["social_only", "Соцсети"], ["bad_site", "Слабый сайт"], ["", "Все"]];
 
 function kindBadge(c) {
-  const label = c.kind === "bad_site" && c.score != null ? (c.score === 0 ? "Сайт не работает" : `Сайт ${c.score}/100`) : state.meta.kinds[c.kind];
+  const label = c.kind === "bad_site" && c.score != null ? (c.score === 0 ? "Сайт не открылся" : `Сайт ${c.score}/100`) : state.meta.kinds[c.kind];
   return `<span class="badge ${c.kind}">${esc(label)}</span>`;
 }
 
@@ -246,7 +246,7 @@ function renderOverview() {
       <div class="pitch">Повод: «соцсети + сайт» — сайт приводит клиентов из поиска, а соцсети удерживают.</div>`;
   } else if (a) {
     const color = a.score >= 60 ? "var(--success)" : a.score >= 35 ? "var(--orange)" : "var(--danger)";
-    const verdict = !a.reachable ? "Сайт не работает" : a.score >= 60 ? "Сайт в порядке" : a.score >= 35 ? "Требует обновления" : "Сайт сильно устарел";
+    const verdict = !a.reachable ? "Сайт не открылся" : a.score >= 60 ? "Сайт в порядке" : a.score >= 35 ? "Требует обновления" : "Сайт сильно устарел";
     auditHtml = `<div class="score"><div class="ring" style="--v:${a.score};--c:${color}"><b>${a.score}</b></div>
         <div><strong>${verdict}</strong><p>${a.load_time ? `Загрузка ${a.load_time} с · ` : ""}${a.issues.length} ${plural(a.issues.length, "проблема", "проблемы", "проблем")}</p></div></div>
       ${a.issues.length ? `<ul class="issues">${a.issues.map(i => `<li>${icon("alert", 15)}<span>${esc(i)}</span></li>`).join("")}</ul>` : ""}`;
