@@ -25,7 +25,7 @@ def test_detail_messages_mockup_status(client):
     client.post("/api/demo")
     cid = client.get("/api/companies").json()[0]["id"]
     d = client.get(f"/api/companies/{cid}").json()
-    assert {m["channel"] for m in d["messages"]} == {"whatsapp", "email", "call", "followup"}
+    assert {m["channel"] for m in d["messages"]} == {"whatsapp", "telegram", "vk", "instagram", "email", "call", "followup"}
     assert d["name"] in d["messages"][0]["text"]
 
     for v in range(3):

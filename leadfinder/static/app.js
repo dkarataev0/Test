@@ -101,17 +101,22 @@ async function loadMeta() {
   $("#demo-banner").hidden = !m.demo;
   const leads = m.counts.no_site + m.counts.social_only + m.counts.bad_site;
   const stats = [
-    ["leads", "Потенциальных клиентов", leads, "#3B82F6"],
-    ["no_site", "Без сайта", m.counts.no_site, "#F43F5E"],
-    ["social_only", "Только соцсети", m.counts.social_only, "#F59E0B"],
-    ["bad_site", "Слабый сайт", m.counts.bad_site, "#FB923C"],
-    ["deal", "Клиентов в работе", `${m.in_work} / ${m.deals}`, "#10B981"],
+    ["leads", "Потенциальных клиентов", leads, "#6D28D9"],
+    ["no_site", "Без сайта", m.counts.no_site, "#E11D48"],
+    ["social_only", "Только соцсети", m.counts.social_only, "#D97706"],
+    ["bad_site", "Слабый сайт", m.counts.bad_site, "#EA580C"],
+    ["deal", "В работе / клиенты", `${m.in_work} / ${m.deals}`, "#059669"],
   ];
   $("#stats").innerHTML = stats.map(([k, label, v, color]) => `
     <button class="stat ${state.filters.kind === k ? "active" : ""}" data-kind="${k}" style="--accent:${color}" ${k === "deal" ? 'title="Написал или ответил / стали клиентами"' : ""}>
       <span class="stat-label"><i></i>${esc(label)}</span>
-      <span class="stat-value">${esc(v)}</span>
+      <span class="stat-value" data-count="${typeof v === "number" ? v : ""}">${esc(v)}</span>
     </button>`).join("");
+  countUp();
+  $("#hero-title").textContent = leads ? `${leads} ${plural(leads, "потенциальный клиент", "потенциальных клиента", "потенциальных клиентов")}` : "Клиенты для ваших сайтов";
+  $("#hero-text").textContent = leads
+    ? `${m.city}: ${m.counts.no_site} без сайта, ${m.counts.social_only} только в соцсетях, ${m.counts.bad_site} со слабым сайтом.${m.last_scan ? ` Последний поиск: ${m.last_scan.replace("T", " в ")}.` : ""}`
+    : `Ищу малый бизнес (${m.city}) без сайта или со слабым сайтом, проверяю их сайты и готовлю сообщение и макет для каждого.`;
 
   if ($("#niche-filter").options.length === 1) {
     for (const [k, v] of Object.entries(m.niches)) $("#niche-filter").add(new Option(v, k));
@@ -126,6 +131,23 @@ async function loadList() {
   const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q });
   state.items = await api("/api/companies?" + qs);
   renderGrid();
+}
+
+// Цифры статистики «набегают» при первой загрузке
+let counted = false;
+function countUp() {
+  if (counted || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  counted = true;
+  document.querySelectorAll(".stat-value[data-count]").forEach(el => {
+    const to = +el.dataset.count; if (!to) return;
+    const t0 = performance.now(), dur = 900;
+    const step = now => {
+      const k = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(to * e);
+      if (k < 1) requestAnimationFrame(step);
+    };
+    el.textContent = "0"; requestAnimationFrame(step);
+  });
 }
 
 function renderKindSeg() {
@@ -155,11 +177,11 @@ function renderGrid() {
     return;
   }
   empty.hidden = true;
-  $("#result-line").textContent = `Показано ${items.length} ${plural(items.length, "компания", "компании", "компаний")} · сначала самые перспективные`;
+  $("#result-line").textContent = `Показано ${items.length} ${plural(items.length, "компания", "компании", "компаний")}, сначала самые перспективные`;
   grid.innerHTML = items.map((c, i) => {
     const has = { phone: !!c.phone, chat: !!(c.socials.whatsapp || c.socials.telegram || digits(c.phone).startsWith("79")), mail: !!c.email, globe: !!c.website, link: Object.keys(c.socials).length > 0 };
     return `
-    <button class="company" data-id="${esc(c.id)}" style="animation-delay:${Math.min(i, 20) * 25}ms">
+    <button class="company appear" data-id="${esc(c.id)}" style="animation-delay:${Math.min(i, 16) * 35}ms">
       <div class="c-top">
         <span class="cat"><span class="cat-ic">${icon(c.niche, 14)}</span>${esc(c.category)}</span>
         ${kindBadge(c)}
@@ -178,6 +200,7 @@ function renderGrid() {
 async function openCompany(id) {
   state.current = await api(`/api/companies/${encodeURIComponent(id)}`);
   state.tab = "overview";
+  state.channel = "all";
   state.variant = 0;
   const c = state.current;
   $("#d-meta").innerHTML = `<span class="cat"><span class="cat-ic">${icon(c.niche, 14)}</span>${esc(c.category)}</span>${kindBadge({ ...c, score: c.audit?.score })}${c.demo ? '<span class="badge unchecked">демо</span>' : ""}`;
@@ -203,9 +226,17 @@ function renderTab() {
     b.classList.toggle("active", b.dataset.tab === state.tab);
     b.setAttribute("aria-selected", b.dataset.tab === state.tab);
   });
+  moveTabInk();
   const body = $("#d-body");
   body.scrollTop = 0;
   body.innerHTML = { overview: renderOverview, messages: renderMessages, mockup: renderMockup }[state.tab]();
+  body.classList.remove("swap"); void body.offsetWidth; body.classList.add("swap");
+}
+function moveTabInk() {
+  const tabs = $(".tabs"), active = tabs.querySelector("button.active");
+  let ink = tabs.querySelector(".tab-ink");
+  if (!ink) { ink = document.createElement("span"); ink.className = "tab-ink"; tabs.append(ink); }
+  if (active) { ink.style.left = active.offsetLeft + "px"; ink.style.width = active.offsetWidth + "px"; }
 }
 
 function contactRow(ic, label, value, href, copyVal) {
@@ -279,30 +310,79 @@ function renderOverview() {
     </div>`;
 }
 
+// Каналы связи: цвет, значок, есть ли контакт и как отправить
+const NETS = {
+  whatsapp: { color: "#25D366", mark: "W" },
+  telegram: { color: "#229ED9", mark: "T" },
+  vk: { color: "#0077FF", mark: "VK" },
+  instagram: { color: "linear-gradient(135deg,#F58529,#DD2A7B,#8134AF)", mark: "IG" },
+  email: { color: "#6D28D9", icon: "mail" },
+  call: { color: "#059669", icon: "phone" },
+  followup: { color: "#9A93B3", icon: "clock" },
+};
+
+function channelInfo(channel, c, text, subject) {
+  const d = digits(c.phone), s = c.socials, q = encodeURIComponent(`${c.name} ${state.meta.city}`);
+  const mobile = d.startsWith("79");
+  switch (channel) {
+    case "whatsapp": {
+      const has = !!(s.whatsapp || mobile);
+      const num = s.whatsapp ? digits(s.whatsapp) : d;
+      return { has, note: has ? (s.whatsapp ? "WhatsApp указан в карточке" : "Мобильный номер, скорее всего есть WhatsApp") : "Нет мобильного номера",
+        href: has ? `https://wa.me/${num}?text=${encodeURIComponent(text)}` : null, label: "Отправить" };
+    }
+    case "telegram":
+      if (s.telegram) return { has: true, note: "Telegram указан в карточке", href: s.telegram, label: "Открыть чат", copyFirst: true };
+      return { has: mobile, note: mobile ? "Попробуйте найти по номеру" : "Telegram не найден",
+        href: mobile ? `https://t.me/+${d}` : null, label: "Найти по номеру", copyFirst: true };
+    case "vk":
+      if (s.vk) return { has: true, note: "Страница ВКонтакте в карточке", href: s.vk, label: "Открыть страницу", copyFirst: true };
+      return { has: false, note: "Страницы нет в данных, поищите", href: `https://vk.com/search?c%5Bq%5D=${q}&c%5Bsection%5D=communities`, label: "Найти во ВКонтакте", copyFirst: true };
+    case "instagram":
+      if (s.instagram) return { has: true, note: "Instagram в карточке", href: s.instagram, label: "Открыть профиль", copyFirst: true };
+      return { has: false, note: "Профиля нет в данных, поищите", href: `https://www.google.com/search?q=${q}+instagram`, label: "Найти профиль", copyFirst: true };
+    case "email":
+      return { has: !!c.email, note: c.email || "Email нет в данных",
+        href: c.email ? `mailto:${c.email}?subject=${encodeURIComponent(subject || "")}&body=${encodeURIComponent(text)}` : null, label: "Отправить письмо" };
+    case "call":
+      return { has: !!d, note: c.phone || "Телефона нет в данных", href: d ? `tel:+${d}` : null, label: "Позвонить" };
+    default:
+      return { has: true, note: "Если не ответили за 3 дня", href: mobile ? `https://wa.me/${d}?text=${encodeURIComponent(text)}` : null, label: "В WhatsApp" };
+  }
+}
+
+function netMark(channel) {
+  const n = NETS[channel];
+  return `<span class="net" style="background:${n.color}">${n.icon ? icon(n.icon, 14) : n.mark}</span>`;
+}
+
 function renderMessages() {
-  const c = state.current;
-  const me = loadSettings();
-  const d = digits(c.phone);
-  const tg = c.socials.telegram;
-  const head = !me.name ? `<p class="hint">${icon("info", 14)}<span>Укажите своё имя и телефон - они подставятся в тексты. <a data-action="settings">Заполнить</a></span></p>` : "";
-  return head + c.messages.map((msg, i) => {
+  const c = state.current, me = loadSettings();
+  const pick = state.channel || "all";
+  const chips = [`<button data-channel="all" class="${pick === "all" ? "active" : ""}">Все</button>`].concat(c.messages.map(m => {
+    const info = channelInfo(m.channel, c, "", m.subject);
+    return `<button data-channel="${m.channel}" class="${pick === m.channel ? "active" : ""}">${netMark(m.channel)}${esc(m.title.replace(" через 3 дня", ""))}<span class="has ${info.has ? "" : "no"}" title="${info.has ? "Контакт есть" : "Контакта нет"}"></span></button>`;
+  }));
+  const head = `<div class="channels" role="tablist" aria-label="Канал">${chips.join("")}</div>` +
+    (!me.name ? `<p class="hint">${icon("info", 14)}<span>Укажите своё имя и телефон, они подставятся в тексты. <a data-action="settings">Заполнить</a></span></p>` : "");
+  const blocks = c.messages.map((msg, i) => {
+    if (pick !== "all" && pick !== msg.channel) return "";
     const text = fillPlaceholders(msg.text);
+    const info = channelInfo(msg.channel, c, text, msg.subject);
     const actions = [`<button class="btn btn-ghost btn-sm" data-copy-msg="${i}">${icon("copy", 14)}Копировать</button>`];
-    if (msg.channel === "whatsapp" || msg.channel === "followup") {
-      if (d) actions.push(`<a class="btn btn-success btn-sm" data-sent target="_blank" rel="noopener" href="https://wa.me/${d}?text=${encodeURIComponent(text)}">${icon("send", 14)}WhatsApp</a>`);
-      if (tg) actions.push(`<a class="btn btn-ghost btn-sm" data-sent data-copy-msg="${i}" target="_blank" rel="noopener" href="${esc(tg)}">${icon("send", 14)}Telegram</a>`);
+    if (info.href) {
+      const kind = info.has ? "btn-primary" : "btn-ghost";
+      const ext = info.href.startsWith("http") ? 'target="_blank" rel="noopener"' : "";
+      actions.push(`<a class="btn ${kind} btn-sm" data-sent ${info.copyFirst ? `data-copy-msg="${i}"` : ""} ${ext} href="${esc(info.href)}">${icon("send", 14)}${esc(info.label)}</a>`);
     }
-    if (msg.channel === "email" && c.email) {
-      actions.push(`<a class="btn btn-primary btn-sm" data-sent href="mailto:${esc(c.email)}?subject=${encodeURIComponent(msg.subject)}&body=${encodeURIComponent(text)}">${icon("mail", 14)}Отправить</a>`);
-    }
-    if (msg.channel === "call" && d) actions.push(`<a class="btn btn-primary btn-sm" data-sent href="tel:+${d}">${icon("phone", 14)}Позвонить</a>`);
-    const ic = { whatsapp: "chat", email: "mail", call: "phone", followup: "clock" }[msg.channel];
     return `<div class="msg">
-      <div class="msg-head"><b>${icon(ic)}${esc(msg.title)}</b><div class="msg-actions">${actions.join("")}</div></div>
+      <div class="msg-head"><b>${netMark(msg.channel)}<span>${esc(msg.title)}<small>${esc(info.note)}</small></span></b><div class="msg-actions">${actions.join("")}</div></div>
       ${msg.subject ? `<div class="msg-subject">Тема: <b>${esc(msg.subject)}</b></div>` : ""}
       <div class="msg-text">${highlight(text)}</div>
     </div>`;
-  }).join("") + `<p class="hint">${icon("info", 14)}Совет: приложите к сообщению скриншот макета со вкладки «Макет сайта» - это сильно повышает отклик.</p>`;
+  }).join("");
+  const tip = `<p class="hint">${icon("info", 14)}Для Telegram, ВКонтакте и Instagram текст копируется автоматически: откройте чат и вставьте его.</p>`;
+  return head + blocks + tip;
 }
 
 function renderMockup() {
@@ -361,7 +441,8 @@ function setProgress(pct, text, error = false) {
   wrap.classList.toggle("indeterminate", pct === null);
   bar.style.width = pct === null ? "" : `${pct}%`;
   $("#scan-msg").textContent = text;
-  $("#scan-msg").style.color = error ? "#FDA4AF" : "";
+  $("#scan-msg").style.color = error ? "#BE123C" : "";
+  $("#scan-progress").classList.toggle("idle", error || pct === 100);
 }
 async function startScan(e) {
   e.preventDefault();
@@ -448,7 +529,7 @@ function bind() {
   $("#status-filter").addEventListener("change", e => { state.filters.status = e.target.value; loadList(); });
 
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-kind], .company, [data-action], [data-copy], [data-copy-msg], [data-status], [data-variant], [data-device], .tabs button");
+    const t = e.target.closest("[data-kind], .company, [data-action], [data-copy], [data-copy-msg], [data-status], [data-channel], [data-variant], [data-device], .tabs button");
     if (!t) return;
     if (t.matches(".stat, #kind-filter button")) {
       const deal = t.dataset.kind === "deal";
@@ -472,6 +553,7 @@ function bind() {
       return;
     }
     if (t.dataset.status) { setStatus(t.dataset.status); return; }
+    if (t.dataset.channel) { state.channel = t.dataset.channel; renderTab(); return; }
     if (t.dataset.variant) { state.variant = +t.dataset.variant; renderTab(); return; }
     if (t.dataset.device) { state.device = t.dataset.device; renderTab(); return; }
     if (t.matches(".tabs button")) { state.tab = t.dataset.tab; renderTab(); }

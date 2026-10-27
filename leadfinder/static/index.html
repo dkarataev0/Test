@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LeadFinder - поиск клиентов</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233B82F6'/%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M19 19l5 5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236D28D9'/%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M19 19l5 5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 </head>
 <body>
 <header class="topbar">
@@ -18,11 +18,27 @@
   <div class="top-actions">
     <button class="btn btn-ghost icon-only" id="btn-settings" aria-label="Настройки" title="Мои данные для сообщений"></button>
     <a class="btn btn-ghost" id="btn-export" href="/api/export.csv"><span data-icon="download"></span><span class="hide-sm">Экспорт</span></a>
-    <button class="btn btn-primary" id="btn-scan"><span data-icon="radar"></span>Найти<span class="hide-sm">&nbsp;клиентов</span></button>
+    <button class="btn btn-primary" id="btn-scan"><span data-icon="radar"></span><span>Найти клиентов</span></button>
   </div>
 </header>
 
 <main class="container">
+  <section class="hero" aria-labelledby="hero-title">
+    <div>
+      <h1 id="hero-title">Клиенты для ваших сайтов</h1>
+      <p id="hero-text">Ищу малый бизнес без сайта или со слабым сайтом, проверяю их сайты и готовлю сообщение и макет для каждого.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" data-action="scan"><span data-icon="radar"></span>Найти клиентов</button>
+        <a class="btn btn-ghost" href="#grid">К списку</a>
+      </div>
+    </div>
+    <div class="radar" aria-hidden="true">
+      <span class="ring-c"></span><span class="ring-c"></span><span class="ring-c"></span>
+      <span class="sweep"></span><span class="core"></span>
+      <span class="blip b1"></span><span class="blip b2"></span><span class="blip b3"></span><span class="blip b4"></span>
+    </div>
+  </section>
+
   <div class="demo-banner" id="demo-banner" hidden>
     <span data-icon="info"></span>
     <span>Сейчас показаны <b>демо-данные</b> (вымышленные компании). Нажмите «Найти клиентов», чтобы загрузить реальные из OpenStreetMap.</span>
@@ -47,7 +63,7 @@
 
   <section class="empty" id="empty" hidden>
     <div class="empty-art">
-      <svg viewBox="0 0 120 120" width="120" height="120" fill="none"><circle cx="60" cy="60" r="56" stroke="currentColor" stroke-opacity=".15" stroke-width="2"/><circle cx="60" cy="60" r="36" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/><circle cx="60" cy="60" r="16" fill="#3B82F6" fill-opacity=".25" stroke="#3B82F6" stroke-width="2"/><circle cx="88" cy="34" r="5" fill="#F43F5E"/><circle cx="30" cy="80" r="4" fill="#F59E0B"/><circle cx="84" cy="88" r="3.5" fill="#10B981"/></svg>
+      <svg viewBox="0 0 120 120" width="120" height="120" fill="none"><circle cx="60" cy="60" r="56" stroke="currentColor" stroke-opacity=".15" stroke-width="2"/><circle cx="60" cy="60" r="36" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/><circle cx="60" cy="60" r="16" fill="#8B5CF6" fill-opacity=".25" stroke="#8B5CF6" stroke-width="2"/><circle cx="88" cy="34" r="5" fill="#F43F5E"/><circle cx="30" cy="80" r="4" fill="#F59E0B"/><circle cx="84" cy="88" r="3.5" fill="#10B981"/></svg>
     </div>
     <h2 id="empty-title">Пока никого не нашли</h2>
     <p id="empty-text">Запустите поиск: соберу малый бизнес Краснодара из OpenStreetMap, проверю их сайты и покажу тех, кому нужен новый сайт.</p>
@@ -88,8 +104,11 @@
     </fieldset>
     <label class="switch"><input type="checkbox" id="scan-audit" checked><span></span>Проверять качество сайтов (дольше, но точнее)</label>
     <div class="progress-box" id="scan-progress" hidden>
-      <div class="progress"><i id="scan-bar"></i></div>
-      <p id="scan-msg" class="muted"></p>
+      <span class="mini-radar" aria-hidden="true"></span>
+      <div class="progress-info">
+        <div class="progress"><i id="scan-bar"></i></div>
+        <p id="scan-msg" class="muted"></p>
+      </div>
     </div>
     <div class="dialog-actions">
       <button type="button" class="btn btn-ghost" id="scan-resume" hidden></button>
