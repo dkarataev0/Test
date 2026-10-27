@@ -78,6 +78,25 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         except StorageUnavailable as exc:
             return JSONResponse({"ok": False, "error": str(exc)}, status_code=503)
 
+    @app.get("/api/diag/overpass")
+    async def diag_overpass():
+        """Временная диагностика доступности зеркал Overpass с сервера."""
+        import time
+        import httpx
+        urls = osm.OVERPASS_URLS + ["https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+                                    "https://overpass.osm.ch/api/interpreter"]
+        out = {}
+        async with httpx.AsyncClient(timeout=20, headers={"User-Agent": osm.USER_AGENT}) as c:
+            async def one(u):
+                t = time.monotonic()
+                try:
+                    r = await c.post(u, data={"data": "[out:json];node(1);out;"})
+                    out[u] = f"{r.status_code} {time.monotonic() - t:.1f}s {r.text[:80]!r}"
+                except Exception as e:
+                    out[u] = f"{type(e).__name__} {time.monotonic() - t:.1f}s"
+            await asyncio.gather(*(one(u) for u in urls))
+        return out
+
     @app.get("/login", response_class=HTMLResponse)
     def login_page():
         return (ROOT / "static" / "login.html").read_text(encoding="utf-8")
