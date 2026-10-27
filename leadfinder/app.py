@@ -3,11 +3,15 @@ import asyncio
 import csv
 import datetime as dt
 import io
+import hashlib
+import hmac
 import json
 import logging
+import os
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import (FileResponse, HTMLResponse, JSONResponse, RedirectResponse,
+                               StreamingResponse)
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -16,9 +20,11 @@ from .config import CITY, DB_PATH, NICHES, ROOT
 from .messages import build_messages
 from .mockup import THEMES, render_mockup
 from .models import Company
-from .storage import Storage
+from .storage import Storage, get_storage
 
 log = logging.getLogger(__name__)
+
+COOKIE = "lf_session"
 
 STATUSES = {"new": "Новый", "contacted": "Написал", "replied": "Ответил",
             "deal": "Клиент", "rejected": "Отказ"}
@@ -28,7 +34,6 @@ KINDS = {"no_site": "Нет сайта", "social_only": "Только соцсе
 
 class ScanRequest(BaseModel):
     niches: list[str] = list(NICHES)
-    audit: bool = True
 
 
 class UpdateRequest(BaseModel):
@@ -36,40 +41,86 @@ class UpdateRequest(BaseModel):
     note: str | None = None
 
 
-def create_app(storage: Storage | None = None) -> FastAPI:
+class LoginRequest(BaseModel):
+    password: str
+
+
+AUDIT_BATCH = 12  # сайтов за один запрос — укладываемся в лимит времени serverless-функции
+PUBLIC_PATHS = ("/login", "/api/login", "/mockup/", "/static/login")
+
+
+def create_app(storage: Storage | None = None, password: str | None = None) -> FastAPI:
     app = FastAPI(title="LeadFinder")
-    store = storage or Storage(DB_PATH)
-    job = {"running": False, "stage": "idle", "done": 0, "total": 0, "message": "", "error": None}
+    store = storage or get_storage(DB_PATH)
+    password = password if password is not None else os.getenv("LEADFINDER_PASSWORD", "")
+    token = hmac.new(password.encode(), b"leadfinder-session", hashlib.sha256).hexdigest()
+
+    @app.middleware("http")
+    async def require_login(request: Request, call_next):
+        path = request.url.path
+        if not password or path.startswith(PUBLIC_PATHS) or \
+                hmac.compare_digest(request.cookies.get(COOKIE, ""), token):
+            return await call_next(request)
+        if path.startswith("/api/"):
+            return JSONResponse({"detail": "Нужно войти"}, status_code=401)
+        return RedirectResponse("/login")
+
+    @app.get("/login", response_class=HTMLResponse)
+    def login_page():
+        return (ROOT / "static" / "login.html").read_text(encoding="utf-8")
+
+    @app.post("/api/login")
+    async def login(req: LoginRequest):
+        if not password or not hmac.compare_digest(req.password.encode(), password.encode()):
+            await asyncio.sleep(1)  # замедляем перебор
+            raise HTTPException(401, "Неверный пароль")
+        resp = JSONResponse({"ok": True})
+        resp.set_cookie(COOKIE, token, max_age=60 * 60 * 24 * 90, httponly=True,
+                        samesite="lax", secure=os.getenv("VERCEL") == "1")
+        return resp
+
+    @app.post("/api/logout")
+    def logout():
+        resp = JSONResponse({"ok": True})
+        resp.delete_cookie(COOKIE)
+        return resp
 
     def card(c: Company) -> dict:
         return {**c.model_dump(exclude={"audit"}), "priority": c.priority,
                 "score": c.audit.score if c.audit else None,
                 "issues_count": len(c.audit.issues) if c.audit else 0}
 
-    async def run_scan(req: ScanRequest):
-        job.update(running=True, stage="search", done=0, total=0, error=None,
-                   message=f"Ищу компании в {CITY}е в OpenStreetMap…")
+    def pending_audit() -> list[Company]:
+        return [c for c in store.all() if c.website and c.kind == "unchecked"]
+
+    # Поиск идёт шагами по запросу из браузера: так он работает и локально,
+    # и на хостинге, где фоновые задачи не живут дольше одного запроса.
+    @app.post("/api/scan/search")
+    async def scan_search(req: ScanRequest):
+        if not req.niches or any(n not in NICHES for n in req.niches):
+            raise HTTPException(400, "Выберите хотя бы одну нишу")
         try:
-            companies = await osm.fetch_companies(req.niches, CITY, lambda m: job.update(message=m))
-            job.update(message=f"Найдено компаний: {len(companies)}")
-            if req.audit:
-                with_site = [c for c in companies if c.website]
-                job.update(stage="audit", total=len(with_site), message="Проверяю сайты…")
+            companies = await osm.fetch_companies(req.niches, CITY)
+        except RuntimeError as exc:
+            raise HTTPException(502, str(exc))
+        # уже проверенные сайты не проверяем повторно
+        known = {c.id: c for c in store.all()}
+        for c in companies:
+            old = known.get(c.id)
+            if old and old.audit and old.website == c.website:
+                c.audit, c.kind = old.audit, old.kind
+        store.clear_demo()
+        store.upsert(companies)
+        store.set_meta("last_scan", dt.datetime.now().isoformat(timespec="minutes"))
+        return {"found": len(companies), "to_audit": sum(1 for c in companies if c.website and c.kind == "unchecked")}
 
-                def progress(done, total, name):
-                    job.update(done=done, total=total, message=f"Проверен сайт: {name}")
-
-                await audit.audit_companies(companies, progress)
-            store.clear_demo()
-            store.upsert(companies)
-            store.set_meta("last_scan", dt.datetime.now().isoformat(timespec="minutes"))
-            leads = sum(c.kind in ("no_site", "social_only", "bad_site") for c in companies)
-            job.update(stage="done", message=f"Готово: {len(companies)} компаний, из них потенциальных клиентов — {leads}")
-        except Exception as exc:  # показываем пользователю понятную ошибку
-            log.exception("Поиск не удался")
-            job.update(stage="error", error=str(exc), message=str(exc))
-        finally:
-            job["running"] = False
+    @app.post("/api/scan/audit")
+    async def scan_audit():
+        batch = pending_audit()[:AUDIT_BATCH]
+        await audit.audit_companies(batch)
+        store.upsert(batch)
+        return {"checked": len(batch), "remaining": len(pending_audit()),
+                "last": batch[-1].name if batch else None}
 
     @app.get("/api/meta")
     def meta():
@@ -85,21 +136,9 @@ def create_app(storage: Storage | None = None) -> FastAPI:
             "deals": sum(c.status == "deal" for c in items),
             "last_scan": store.get_meta("last_scan"),
             "demo": any(c.demo for c in items),
+            "pending_audit": sum(1 for c in items if c.website and c.kind == "unchecked"),
+            "auth": bool(password),
         }
-
-    @app.post("/api/scan")
-    async def scan(req: ScanRequest):
-        if job["running"]:
-            raise HTTPException(409, "Поиск уже идёт")
-        bad = [n for n in req.niches if n not in NICHES]
-        if bad or not req.niches:
-            raise HTTPException(400, "Выберите хотя бы одну нишу")
-        app.state.scan_task = asyncio.create_task(run_scan(req))  # держим ссылку, чтобы задачу не собрал GC
-        return {"ok": True}
-
-    @app.get("/api/scan/status")
-    def scan_status():
-        return job
 
     @app.post("/api/demo")
     def load_demo():

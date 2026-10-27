@@ -44,6 +44,7 @@ const plural = (n, one, few, many) => {
 };
 async function api(path, opts = {}) {
   const r = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  if (r.status === 401 && !path.startsWith("/api/login")) { location.href = "/login"; throw new Error("Нужно войти"); }
   if (!r.ok) {
     let msg = `Ошибка ${r.status}`;
     try { msg = (await r.json()).detail || msg; } catch {}
@@ -323,6 +324,7 @@ function renderMockup() {
     </div>
     <div class="quick">
       <a class="btn btn-primary btn-sm" href="${src}" target="_blank" rel="noopener">${icon("external", 14)}Открыть в новой вкладке</a>
+      <button class="btn btn-ghost btn-sm" data-copy="${esc(location.origin + src)}">${icon("link", 14)}Ссылка для клиента</button>
       <a class="btn btn-ghost btn-sm" href="${src}&download=1">${icon("download", 14)}Скачать HTML</a>
     </div>
     <p class="hint">${icon("info", 14)}Откройте макет в новой вкладке и сделайте скриншот — его удобно отправить клиенту вместе с сообщением.</p>`;
@@ -351,38 +353,61 @@ async function setStatus(status) {
   await Promise.all([loadMeta(), loadList()]);
 }
 
-/* ---------- Поиск ---------- */
-let pollTimer;
-async function startScan(e) {
-  e.preventDefault();
-  const niches = [...document.querySelectorAll('#scan-niches input:checked')].map(i => i.value);
-  if (!niches.length) { toast("Выберите хотя бы одну нишу"); return; }
-  try {
-    await api("/api/scan", { method: "POST", body: JSON.stringify({ niches, audit: $("#scan-audit").checked }) });
-  } catch (err) { showScanMsg(err.message, true); return; }
-  $("#scan-start").disabled = true;
+/* ---------- Поиск (шагами: найти компании → проверить сайты пачками) ---------- */
+let scanning = false;
+function setProgress(pct, text, error = false) {
+  const bar = $("#scan-bar"), wrap = bar.parentElement;
   $("#scan-progress").hidden = false;
-  poll();
-}
-function showScanMsg(text, error = false) {
-  $("#scan-progress").hidden = false;
+  wrap.classList.toggle("indeterminate", pct === null);
+  bar.style.width = pct === null ? "" : `${pct}%`;
   $("#scan-msg").textContent = text;
   $("#scan-msg").style.color = error ? "#FDA4AF" : "";
 }
-async function poll() {
-  const s = await api("/api/scan/status");
-  const bar = $("#scan-bar"), wrap = bar.parentElement;
-  const determinate = s.stage === "audit" && s.total > 0;
-  wrap.classList.toggle("indeterminate", s.running && !determinate);
-  bar.style.width = determinate ? `${Math.round(s.done / s.total * 100)}%` : s.stage === "done" ? "100%" : "";
-  showScanMsg(determinate ? `${s.message} (${s.done} из ${s.total})` : s.message, s.stage === "error");
-  if (s.running) { pollTimer = setTimeout(poll, 800); return; }
-  $("#scan-start").disabled = false;
-  wrap.classList.remove("indeterminate");
-  if (s.stage === "done") {
+async function startScan(e) {
+  e.preventDefault();
+  if (scanning) return;
+  const niches = [...document.querySelectorAll("#scan-niches input:checked")].map(i => i.value);
+  if (!niches.length) { toast("Выберите хотя бы одну нишу"); return; }
+  scanning = true;
+  $("#scan-start").disabled = true;
+  try {
+    setProgress(null, `Ищу компании (${state.meta.city}) в OpenStreetMap… это может занять до 2 минут`);
+    const found = await api("/api/scan/search", { method: "POST", body: JSON.stringify({ niches }) });
+    await Promise.all([loadMeta(), loadList()]);
+    if ($("#scan-audit").checked) await auditSites(found.to_audit);
+    setProgress(100, `Готово: найдено ${found.found} ${plural(found.found, "компания", "компании", "компаний")}`);
     await Promise.all([loadMeta(), loadList()]);
     toast("Поиск завершён");
+  } catch (err) {
+    setProgress(0, err.message, true);
+  } finally {
+    scanning = false;
+    $("#scan-start").disabled = false;
   }
+}
+async function auditSites(total) {
+  total = Math.max(total, 1);
+  let remaining = total;
+  setProgress(0, "Проверяю сайты…");
+  while (remaining > 0) {
+    const r = await api("/api/scan/audit", { method: "POST" });
+    remaining = r.remaining;
+    const done = Math.max(total - remaining, 0);
+    setProgress(Math.round(done / total * 100), `Проверено сайтов: ${done} из ${total}${r.last ? ` · ${r.last}` : ""}`);
+    if (!r.checked) break;
+    await Promise.all([loadMeta(), loadList()]);
+  }
+}
+
+function showResumeHint(n) {
+  toast(`Не проверено сайтов: ${n}. Нажмите «Найти клиентов», чтобы продолжить`);
+}
+async function resumeAudit() {
+  if (scanning) return;
+  scanning = true;
+  try { await auditSites(state.meta.pending_audit); toast("Сайты проверены"); }
+  catch (err) { setProgress(0, err.message, true); }
+  finally { scanning = false; await Promise.all([loadMeta(), loadList()]); }
 }
 
 /* ---------- События ---------- */
@@ -445,7 +470,13 @@ function bind() {
   $("#overlay").addEventListener("click", closeDrawer);
   document.addEventListener("keydown", e => { if (e.key === "Escape" && state.current) closeDrawer(); });
 
-  $("#btn-scan").addEventListener("click", () => $("#scan-dialog").showModal());
+  $("#btn-scan").addEventListener("click", () => {
+    $("#scan-dialog").showModal();
+    $("#scan-resume").hidden = !state.meta.pending_audit;
+    $("#scan-resume").textContent = `Допроверить сайты (${state.meta.pending_audit})`;
+  });
+  $("#scan-resume").addEventListener("click", resumeAudit);
+  $("#btn-logout").addEventListener("click", async () => { await api("/api/logout", { method: "POST" }); location.href = "/login"; });
   $("#scan-cancel").addEventListener("click", () => $("#scan-dialog").close());
   $("#scan-form").addEventListener("submit", startScan);
 
@@ -460,6 +491,7 @@ function bind() {
 }
 function openSettings() {
   const me = loadSettings(), f = $("#settings-form");
+  $("#btn-logout").hidden = !state.meta?.auth;
   f.name.value = me.name || ""; f.phone.value = me.phone || ""; f.portfolio.value = me.portfolio || "";
   $("#settings-dialog").showModal();
 }
@@ -473,8 +505,7 @@ function openSettings() {
     await loadMeta();
     renderKindSeg();
     await loadList();
-    const s = await api("/api/scan/status");
-    if (s.running) { $("#scan-dialog").showModal(); $("#scan-start").disabled = true; poll(); }
+    if (state.meta.pending_audit) showResumeHint(state.meta.pending_audit);
   } catch (err) {
     $("#grid").innerHTML = "";
     $("#empty").hidden = false;

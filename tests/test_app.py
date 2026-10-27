@@ -58,39 +58,54 @@ def test_mockup_escapes_html(client, tmp_path):
     assert "<script>alert(1)</script>" not in html
 
 
-def _wait(client):
-    import time
-    for _ in range(100):
-        s = client.get("/api/scan/status").json()
-        if not s["running"]:
-            return s
-        time.sleep(0.05)
-    raise AssertionError("поиск не завершился")
-
-
 def test_scan_reports_unreachable_overpass(client, monkeypatch):
     from leadfinder import osm
     monkeypatch.setattr(osm, "OVERPASS_URLS", ["http://127.0.0.1:9/api"])
-    with client:
-        assert client.post("/api/scan", json={"niches": ["food"]}).status_code == 200
-        s = _wait(client)
-    assert s["stage"] == "error" and "OpenStreetMap" in s["error"]
+    r = client.post("/api/scan/search", json={"niches": ["food"]})
+    assert r.status_code == 502 and "OpenStreetMap" in r.json()["detail"]
 
 
-def test_scan_saves_results_and_replaces_demo(client, monkeypatch):
+def test_scan_steps_search_then_audit(client, monkeypatch):
     import json
     from pathlib import Path
-    from leadfinder import osm
+    from leadfinder import audit, osm
+    from leadfinder.models import Audit
     sample = json.loads((Path(__file__).parent / "fixtures" / "overpass_sample.json").read_text())
 
     async def fake_fetch(niches, city, on_status=None):
         return osm.parse_elements(sample["elements"])
 
+    async def fake_audit(companies, on_progress=None, concurrency=8):
+        for c in companies:
+            c.audit = Audit(score=30, reachable=True, issues=["Сайт не адаптирован под телефоны"])
+            c.kind = "bad_site"
+
     monkeypatch.setattr(osm, "fetch_companies", fake_fetch)
+    monkeypatch.setattr(audit, "audit_companies", fake_audit)
     client.post("/api/demo")
-    with client:
-        client.post("/api/scan", json={"niches": ["food"], "audit": False})
-        s = _wait(client)
-    assert s["stage"] == "done", s
+    r = client.post("/api/scan/search", json={"niches": ["food"]}).json()
+    assert r == {"found": 3, "to_audit": 1}
     meta = client.get("/api/meta").json()
-    assert meta["total"] == 3 and not meta["demo"]
+    assert meta["total"] == 3 and not meta["demo"] and meta["pending_audit"] == 1
+
+    r = client.post("/api/scan/audit").json()
+    assert r["checked"] == 1 and r["remaining"] == 0
+    assert client.post("/api/scan/audit").json()["checked"] == 0
+    # повторный поиск не сбрасывает уже сделанную проверку
+    assert client.post("/api/scan/search", json={"niches": ["food"]}).json()["to_audit"] == 0
+
+
+def test_password_protects_app(tmp_path):
+    c = TestClient(create_app(Storage(tmp_path / "p.db"), password="secret"))
+    assert c.get("/api/meta").status_code == 401
+    r = c.get("/", follow_redirects=False)
+    assert r.status_code in (302, 307) and r.headers["location"] == "/login"
+    assert "Пароль" in c.get("/login").text
+    assert c.post("/api/login", json={"password": "wrong"}).status_code == 401
+    assert c.post("/api/login", json={"password": "secret"}).status_code == 200
+    assert c.get("/api/meta").json()["auth"] is True
+    # макет открывается без входа — ссылку можно отправить клиенту
+    c.post("/api/demo")
+    anon = TestClient(c.app)
+    assert anon.get("/mockup/demo1").status_code == 200
+    assert anon.get("/api/companies").status_code == 401

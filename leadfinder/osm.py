@@ -1,9 +1,10 @@
 """Поиск компаний в OpenStreetMap через Overpass API."""
 import logging
+import time
 
 import httpx
 
-from .config import CITY, NICHES, OVERPASS_URLS, SOCIAL_DOMAINS
+from .config import CITY, NICHES, OVERPASS_BUDGET, OVERPASS_URLS, SOCIAL_DOMAINS
 from .models import Company
 
 log = logging.getLogger(__name__)
@@ -118,14 +119,19 @@ def parse_elements(elements: list[dict]) -> list[Company]:
 async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -> list[Company]:
     query = build_query(niches, city)
     last_error: Exception | None = None
+    deadline = time.monotonic() + OVERPASS_BUDGET
     async with httpx.AsyncClient(timeout=httpx.Timeout(120, connect=15),
                                  headers={"User-Agent": "LeadFinder/1.0"}) as client:
         for i, url in enumerate(OVERPASS_URLS, 1):
             if on_status:
                 on_status(f"Запрос к OpenStreetMap (сервер {i} из {len(OVERPASS_URLS)})…")
+            left = deadline - time.monotonic()
+            if left < 10:
+                break
             try:
                 log.info("Overpass: %s", url)
-                r = await client.post(url, data={"data": query})
+                r = await client.post(url, data={"data": query},
+                                      timeout=httpx.Timeout(min(120, left), connect=15))
                 r.raise_for_status()
                 return parse_elements(r.json().get("elements", []))
             except (httpx.HTTPError, ValueError) as exc:

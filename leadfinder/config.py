@@ -2,16 +2,20 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DATA_DIR = Path(os.getenv("LEADFINDER_DATA", ROOT.parent / "data"))
+# На Vercel файловая система только для чтения, кроме /tmp (там нужен DATABASE_URL)
+_default_data = Path("/tmp/leadfinder") if os.getenv("VERCEL") else ROOT.parent / "data"
+DATA_DIR = Path(os.getenv("LEADFINDER_DATA", _default_data))
 DB_PATH = DATA_DIR / "leads.db"
 
 CITY = os.getenv("LEADFINDER_CITY", "Краснодар")
 
-OVERPASS_URLS = [
+OVERPASS_URLS = os.getenv("LEADFINDER_OVERPASS", ",".join([
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
-]
+])).split(",")
+# Общий бюджет времени на поиск (лимит функции Vercel — 300 с)
+OVERPASS_BUDGET = 240
 
 # Порог: сайт с оценкой ниже считается «требует обновления»
 BAD_SITE_SCORE = 60
