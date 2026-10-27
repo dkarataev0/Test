@@ -13,7 +13,8 @@
   "lat": 45.04406,
   "lon": 38.94079,
   "kind": "no_site",
-  "audit": null
+  "audit": null,
+  "city": "Краснодар"
  },
  {
   "id": "demo2",
@@ -31,7 +32,8 @@
   "lat": 45.03997,
   "lon": 39.00778,
   "kind": "social_only",
-  "audit": null
+  "audit": null,
+  "city": "Краснодар"
  },
  {
   "id": "demo3",
@@ -58,7 +60,8 @@
     "Сайт не адаптирован под телефоны"
    ],
    "checks": {}
-  }
+  },
+  "city": "Краснодар"
  },
  {
   "id": "demo4",
@@ -74,7 +77,8 @@
   "lat": 45.04013,
   "lon": 38.93897,
   "kind": "no_site",
-  "audit": null
+  "audit": null,
+  "city": "Краснодар"
  },
  {
   "id": "demo5",
@@ -92,7 +96,8 @@
   "lat": 45.05651,
   "lon": 38.95817,
   "kind": "social_only",
-  "audit": null
+  "audit": null,
+  "city": "Краснодар"
  },
  {
   "id": "demo6",
@@ -117,137 +122,256 @@
     "Нет иконки сайта во вкладке браузера"
    ],
    "checks": {}
-  }
+  },
+  "city": "Краснодар"
  },
  {
-  "id": "demo19",
-  "name": "Цветочная лавка «Флора»",
-  "niche": "services",
-  "category": "Цветы",
-  "address": "ул. Кожевенная, 152",
-  "phone": "+7 900 000-00-19",
+  "id": "demo30",
+  "name": "Сауна «Кедровая»",
+  "niche": "sauna",
+  "category": "Сауна",
+  "address": "ул. Гимназическая, 145",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-30",
   "email": null,
   "website": null,
   "socials": {
-   "instagram": "https://instagram.com/flora_demo"
+   "vk": "https://vk.com/kedr_demo"
   },
-  "opening_hours": "Mo-Su 08:00-22:00",
-  "lat": 45.02076,
-  "lon": 38.93533,
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa 10:00-16:00",
+  "lat": 45.03211,
+  "lon": 39.0034,
   "kind": "social_only",
   "audit": null
  },
  {
-  "id": "demo20",
-  "name": "Ателье «Иголочка»",
-  "niche": "services",
-  "category": "Ателье",
-  "address": "ул. Кубанская Набережная, 138",
-  "phone": null,
-  "email": "info@demo20.example",
+  "id": "demo31",
+  "name": "Баня на дровах «Пар»",
+  "niche": "sauna",
+  "category": "Баня",
+  "address": "ул. Тургенева, 49",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-31",
+  "email": null,
   "website": null,
   "socials": {},
-  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
-  "lat": 45.04159,
-  "lon": 38.96049,
+  "opening_hours": null,
+  "lat": 45.03355,
+  "lon": 38.98412,
   "kind": "no_site",
   "audit": null
  },
  {
-  "id": "demo21",
-  "name": "Ветклиника «Айболит»",
-  "niche": "services",
-  "category": "Ветклиника",
-  "address": "ул. Ставропольская, 178",
-  "phone": "+7 900 000-00-21",
+  "id": "demo32",
+  "name": "Сауна «Оазис»",
+  "niche": "sauna",
+  "category": "Сауна",
+  "address": "ул. Ставропольская, 26",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-32",
   "email": null,
-  "website": "http://demo21.example",
+  "website": "http://demo32.example",
   "socials": {},
-  "opening_hours": null,
-  "lat": 45.06201,
-  "lon": 38.9874,
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa 10:00-16:00",
+  "lat": 45.0232,
+  "lon": 38.94225,
   "kind": "bad_site",
   "audit": {
-   "score": 25,
+   "score": 35,
    "reachable": true,
-   "final_url": "http://demo21.example",
-   "load_time": 3.3,
+   "final_url": "http://demo32.example",
+   "load_time": 4.2,
    "issues": [
     "Сайт не адаптирован под телефоны",
     "Устаревшие технологии вёрстки",
-    "Сайт долго загружается (5.8 с)",
-    "Нет описания для Яндекса и Google",
     "Нет защищённого соединения (HTTPS) - браузер пишет «Не защищено»"
    ],
    "checks": {}
   }
  },
  {
-  "id": "demo22",
-  "name": "Зоомагазин «Хвостик»",
-  "niche": "services",
-  "category": "Зоомагазин",
-  "address": "ул. Тургенева, 19",
-  "phone": "+7 900 000-00-22",
+  "id": "demo33",
+  "name": "Гостевой дом «У моря»",
+  "niche": "leisure",
+  "category": "Гостевой дом",
+  "address": "ул. Ставропольская, 5",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-33",
+  "email": null,
+  "website": null,
+  "socials": {
+   "instagram": "https://instagram.com/umorya_demo",
+   "telegram": "https://t.me/umorya_demo"
+  },
+  "opening_hours": null,
+  "lat": 45.00879,
+  "lon": 38.93785,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo34",
+  "name": "База отдыха «Лесная»",
+  "niche": "leisure",
+  "category": "База отдыха",
+  "address": "ул. Тургенева, 9",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-34",
   "email": null,
   "website": null,
   "socials": {},
-  "opening_hours": "Mo-Su 08:00-22:00",
-  "lat": 45.03144,
-  "lon": 38.94379,
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa 10:00-16:00",
+  "lat": 45.02458,
+  "lon": 38.98228,
   "kind": "no_site",
   "audit": null
  },
  {
-  "id": "demo23",
-  "name": "Юридическая консультация «Право»",
-  "niche": "services",
-  "category": "Юрист",
-  "address": "ул. Гимназическая, 15",
-  "phone": "+7 900 000-00-23",
+  "id": "demo35",
+  "name": "Квест «Тайна»",
+  "niche": "leisure",
+  "category": "Квест",
+  "address": "ул. Тургенева, 134",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-35",
   "email": null,
-  "website": "http://demo23.example",
+  "website": null,
+  "socials": {
+   "vk": "https://vk.com/tayna_demo"
+  },
+  "opening_hours": "Mo-Su 10:00-23:00",
+  "lat": 45.04342,
+  "lon": 38.97498,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo36",
+  "name": "Боулинг «Страйк»",
+  "niche": "leisure",
+  "category": "Боулинг",
+  "address": "ул. Северная, 119",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-36",
+  "email": null,
+  "website": "http://demo36.example",
   "socials": {},
-  "opening_hours": "Mo-Fr 09:00-20:00; Sa-Su 10:00-18:00",
-  "lat": 45.00501,
-  "lon": 38.9471,
+  "opening_hours": null,
+  "lat": 45.02169,
+  "lon": 39.01481,
   "kind": "bad_site",
   "audit": {
-   "score": 60,
+   "score": 35,
    "reachable": true,
-   "final_url": "http://demo23.example",
-   "load_time": 3.2,
+   "final_url": "http://demo36.example",
+   "load_time": 4.2,
    "issues": [
-    "Сайт давно не обновлялся (последний год на сайте - 2017)",
-    "Сайт долго загружается (5.8 с)",
-    "Сайт не адаптирован под телефоны"
+    "Сайт не адаптирован под телефоны",
+    "Сайт давно не обновлялся (последний год на сайте - 2018)",
+    "Нет защищённого соединения (HTTPS) - браузер пишет «Не защищено»"
    ],
    "checks": {}
   }
  },
  {
-  "id": "demo24",
-  "name": "Фотостудия «Кадр»",
-  "niche": "services",
-  "category": "Фотостудия",
-  "address": "ул. Рашпилевская, 66",
-  "phone": "+7 900 000-00-24",
-  "email": "info@demo24.example",
-  "website": "https://demo24.example",
+  "id": "demo37",
+  "name": "Банкетный зал «Империя»",
+  "niche": "leisure",
+  "category": "Банкетный зал",
+  "address": "ул. Тургенева, 133",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-37",
+  "email": null,
+  "website": null,
   "socials": {},
-  "opening_hours": "Mo-Sa 09:00-19:00; Su off",
-  "lat": 45.04114,
-  "lon": 38.97293,
-  "kind": "ok",
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa 10:00-16:00",
+  "lat": 45.00679,
+  "lon": 38.98005,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo38",
+  "name": "Автошкола «Старт»",
+  "niche": "education",
+  "category": "Автошкола",
+  "address": "ул. Северная, 104",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-38",
+  "email": null,
+  "website": "http://demo38.example",
+  "socials": {},
+  "opening_hours": "Mo-Su 10:00-23:00",
+  "lat": 45.0558,
+  "lon": 38.96592,
+  "kind": "bad_site",
   "audit": {
-   "score": 75,
+   "score": 35,
    "reachable": true,
-   "final_url": "https://demo24.example",
-   "load_time": 1.1,
+   "final_url": "http://demo38.example",
+   "load_time": 4.2,
    "issues": [
-    "Нет иконки сайта во вкладке браузера"
+    "Сайт не адаптирован под телефоны",
+    "Сайт на бесплатном конструкторе, без своего домена",
+    "Устаревшие технологии вёрстки"
    ],
    "checks": {}
   }
+ },
+ {
+  "id": "demo39",
+  "name": "Языковая школа «Хэллоу»",
+  "niche": "education",
+  "category": "Языковая школа",
+  "address": "ул. Тургенева, 15",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-39",
+  "email": null,
+  "website": null,
+  "socials": {
+   "instagram": "https://instagram.com/hello_demo"
+  },
+  "opening_hours": "Mo-Fr 09:00-20:00; Sa 10:00-16:00",
+  "lat": 45.02753,
+  "lon": 38.99171,
+  "kind": "social_only",
+  "audit": null
+ },
+ {
+  "id": "demo40",
+  "name": "Школа танцев «Ритм»",
+  "niche": "education",
+  "category": "Школа танцев",
+  "address": "ул. Мира, 20",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-40",
+  "email": null,
+  "website": null,
+  "socials": {},
+  "opening_hours": null,
+  "lat": 45.04277,
+  "lon": 38.99728,
+  "kind": "no_site",
+  "audit": null
+ },
+ {
+  "id": "demo41",
+  "name": "Частный сад «Солнышко»",
+  "niche": "education",
+  "category": "Частный детский сад",
+  "address": "ул. Московская, 88",
+  "city": "Краснодар",
+  "phone": "+7 900 000-00-41",
+  "email": null,
+  "website": null,
+  "socials": {
+   "vk": "https://vk.com/sun_demo",
+   "whatsapp": "+79000000099"
+  },
+  "opening_hours": "Mo-Su 10:00-23:00",
+  "lat": 45.02367,
+  "lon": 38.93621,
+  "kind": "social_only",
+  "audit": null
  }
 ]

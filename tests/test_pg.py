@@ -15,13 +15,13 @@ def test_pg_storage_roundtrip():
     store = PgStorage(URL)
     store._exec("TRUNCATE companies, meta")
     c = TestClient(create_app(store, password=""))
-    assert c.post("/api/demo").json()["count"] == 12
+    assert c.post("/api/demo").json()["count"] == 18
     cid = "demo1"
     c.patch(f"/api/companies/{cid}", json={"status": "deal", "note": "ура"})
     c.post("/api/demo")
     d = c.get(f"/api/companies/{cid}").json()
     assert d["status"] == "deal" and d["note"] == "ура" and d["demo"]
-    assert c.get("/api/meta").json()["total"] == 12
+    assert c.get("/api/meta").json()["total"] == 18
     store.set_meta("last_scan", "x"); store.set_meta("last_scan", "y")
     assert store.get_meta("last_scan") == "y"
     store.clear_demo()
@@ -34,5 +34,5 @@ def test_pg_delete_new_keeps_contacted():
     c = TestClient(create_app(store, password=""))
     c.post("/api/demo")
     c.patch("/api/companies/demo1", json={"status": "contacted"})
-    assert c.post("/api/companies/clear-new").json() == {"deleted": 11}
+    assert c.post("/api/companies/clear-new").json() == {"deleted": 17}
     assert [x["id"] for x in c.get("/api/companies").json()] == ["demo1"]

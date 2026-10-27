@@ -1,6 +1,6 @@
 {% extends "mockup/base.html" %}
 {% block style %}
-:root { --display: "Prata", Georgia, serif; --body: "Manrope", system-ui, sans-serif; --h2-weight: 400; }
+:root { --display: "{{ display_font }}", Georgia, serif; --body: "Manrope", system-ui, sans-serif; --h2-weight: 400; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 0; }
 .logo { font: 24px/1 var(--display); text-decoration: none; }
 .top nav { display: flex; gap: 30px; font-size: 15px; }
@@ -189,7 +189,7 @@
 
 <section id="services"><div class="wrap">
   <h2>Услуги и цены</h2>
-  <p class="sub">Итоговую стоимость мастер назовёт до начала работы - без доплат в конце.</p>
+  <p class="sub">{{ x.price_note }}</p>
   <div class="price">
     {% for name, desc, time, cost in x.services %}
     <div class="price-row"><h3>{{ name }}</h3><span class="time">{{ time }}</span><span class="cost">{{ cost }}</span><p>{{ desc }}</p></div>
@@ -198,14 +198,14 @@
 </div></section>
 
 <section class="visit"><div class="wrap">
-  <h2>Как проходит визит</h2>
-  <p class="sub">Три шага - и никаких переписок в директе.</p>
+  <h2>{{ x.steps_title }}</h2>
+  <p class="sub">{{ x.steps_sub }}</p>
   <div class="steps">{% for t, d in x.steps %}<div class="step"><h3>{{ t }}</h3><p>{{ d }}</p></div>{% endfor %}</div>
 </div></section>
 
 {% if photos|length > 1 %}
 <section><div class="wrap">
-  <h2>Атмосфера</h2>
+  <h2>{{ x.gallery_title }}</h2>
   <div class="gallery">{% for ph in photos[1:4] %}<img src="{{ ph }}" alt="{{ c.name }}" loading="lazy">{% endfor %}</div>
 </div></section>
 {% endif %}

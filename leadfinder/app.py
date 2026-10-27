@@ -229,7 +229,8 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return {"ok": True, "count": len(data)}
 
     @app.get("/api/companies")
-    def companies(niche: str = "", kind: str = "", status: str = "", q: str = "", sort: str = ""):
+    def companies(niche: str = "", kind: str = "", status: str = "", q: str = "", sort: str = "",
+                  contacts: bool = False):
         items = store.all()
         if niche:
             items = [c for c in items if c.niche == niche]
@@ -239,6 +240,8 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             items = [c for c in items if c.kind == kind]
         if status:
             items = [c for c in items if c.status == status]
+        if contacts:
+            items = [c for c in items if c.phone or c.socials or c.email]
         if q:
             ql = q.lower()
             items = [c for c in items if ql in c.name.lower() or ql in (c.address or "").lower()

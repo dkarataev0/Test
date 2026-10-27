@@ -43,16 +43,40 @@ NICHES = {
             ("leisure", "fitness_centre"): "Фитнес",
         },
     },
-    "services": {
-        "label": "Магазины и услуги",
+    "sauna": {
+        "label": "Сауны и бани",
         "tags": {
-            ("shop", "florist"): "Цветы",
-            ("shop", "tailor"): "Ателье",
-            ("craft", "tailor"): "Ателье",
-            ("amenity", "veterinary"): "Ветклиника",
-            ("shop", "pet"): "Зоомагазин",
-            ("office", "lawyer"): "Юрист",
-            ("shop", "photo"): "Фотостудия",
+            ("leisure", "sauna"): "Сауна",
+            ("amenity", "public_bath"): "Баня",
+        },
+    },
+    "leisure": {
+        "label": "Отдых и досуг",
+        "tags": {
+            ("tourism", "guest_house"): "Гостевой дом",
+            ("tourism", "hotel"): "Мини-отель",
+            ("tourism", "chalet"): "Коттедж",
+            ("leisure", "resort"): "База отдыха",
+            ("leisure", "escape_game"): "Квест",
+            ("leisure", "bowling_alley"): "Боулинг",
+            ("amenity", "events_venue"): "Банкетный зал",
+            ("amenity", "karaoke_box"): "Караоке",
+            ("leisure", "horse_riding"): "Конный клуб",
+            ("leisure", "trampoline_park"): "Батутный центр",
+            ("leisure", "indoor_play"): "Детская игровая",
+        },
+    },
+    "education": {
+        "label": "Обучение и дети",
+        "tags": {
+            ("amenity", "driving_school"): "Автошкола",
+            ("amenity", "language_school"): "Языковая школа",
+            ("amenity", "music_school"): "Музыкальная школа",
+            ("amenity", "dancing_school"): "Школа танцев",
+            ("leisure", "dance"): "Танцевальная студия",
+            ("amenity", "childcare"): "Частный детский сад",
+            ("amenity", "prep_school"): "Подготовка к школе",
+            ("amenity", "training"): "Курсы",
         },
     },
 }
@@ -70,5 +94,5 @@ FREE_BUILDERS = (
 
 
 def niche_of(niche: str) -> str:
-    """Ниша для текстов и макетов. Записи из удалённых ниш показываем как «услуги»."""
-    return niche if niche in NICHES else "services"
+    """Ниша для текстов и макетов. Записи из удалённых ниш показываем как «отдых и досуг»."""
+    return niche if niche in NICHES else "leisure"

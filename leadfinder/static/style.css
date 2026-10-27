@@ -360,3 +360,7 @@ legend { margin-bottom: 10px; color: var(--muted); font-size: 13px; font-weight:
 .danger-zone span { color: var(--muted); font-size: 13px; }
 .btn.danger { color: var(--rose); border-color: #FFC7D3; }
 .btn.danger:hover { background: #FFE8EE; }
+
+.toggle-chip { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); user-select: none; transition: all .2s var(--spring); }
+.toggle-chip input { accent-color: var(--violet); width: 16px; height: 16px; }
+.toggle-chip:has(input:checked) { color: var(--violet); border-color: var(--iris); background: var(--lavender); }

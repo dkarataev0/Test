@@ -26,6 +26,9 @@ const ICONS = {
   food: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
   auto: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
   services: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
+  sauna: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  leisure: '<path d="M3 20h18"/><path d="M12 4L3 20"/><path d="M12 4l9 16"/><path d="M12 4v16"/><path d="M9 20l3-6 3 6"/>',
+  education: '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
 };
 function icon(name, size = 16) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
@@ -128,7 +131,7 @@ async function loadMeta() {
 
 async function loadList() {
   const f = state.filters;
-  const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q, sort: f.sort || "" });
+  const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q, sort: f.sort || "", contacts: f.contacts === false ? "" : "1" });
   state.items = await api("/api/companies?" + qs);
   renderGrid();
 }
@@ -587,6 +590,7 @@ function bind() {
   $("#niche-filter").addEventListener("change", e => { state.filters.niche = e.target.value; loadList(); });
   $("#status-filter").addEventListener("change", e => { state.filters.status = e.target.value; loadList(); });
   $("#sort-select").addEventListener("change", e => { state.filters.sort = e.target.value; loadList(); });
+  $("#contacts-only").addEventListener("change", e => { state.filters.contacts = e.target.checked; loadList(); });
   $("#btn-clear-new").addEventListener("click", async () => {
     if (!confirm(`Удалить всех со статусом «Новый»? Компании, которым вы написали, останутся.`)) return;
     const r = await api("/api/companies/clear-new", { method: "POST" });
