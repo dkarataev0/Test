@@ -55,6 +55,7 @@
       <div class="seg" id="kind-filter" role="tablist" aria-label="Тип"></div>
       <select id="niche-filter" aria-label="Ниша"><option value="">Все ниши</option></select>
       <select id="status-filter" aria-label="Статус"><option value="">Все статусы</option></select>
+      <select id="sort-select" aria-label="Сортировка"><option value="">Сначала перспективные</option><option value="telegram">Сначала с Telegram</option></select>
     </div>
   </section>
 
@@ -99,6 +100,19 @@
     <h2>Поиск клиентов</h2>
     <p class="muted">Город: <b id="scan-city">Краснодар</b>. Источник: OpenStreetMap. Сетевые бренды пропускаю.</p>
     <fieldset>
+      <legend>Где искать</legend>
+      <div class="check-chips" id="scan-region">
+        <label><input type="radio" name="region" value="city" checked><span data-icon="pin"></span>Краснодар</label>
+        <label><input type="radio" name="region" value="krai"><span data-icon="globe"></span>Краснодарский край</label>
+      </div>
+    </fieldset>
+    <label class="field limit-field"><span>Сколько новых компаний добавить</span>
+      <select id="scan-limit">
+        <option value="10">10 новых</option><option value="20" selected>20 новых</option>
+        <option value="50">50 новых</option><option value="100">100 новых</option><option value="">Все найденные</option>
+      </select>
+    </label>
+    <fieldset>
       <legend>Ниши</legend>
       <div class="check-chips" id="scan-niches"></div>
     </fieldset>
@@ -126,6 +140,10 @@
     <label class="field"><span>Ваше имя</span><input name="name" autocomplete="name" placeholder="Например, Дмитрий"></label>
     <label class="field"><span>Телефон</span><input name="phone" autocomplete="tel" placeholder="+7 900 000-00-00"></label>
     <label class="field"><span>Ссылка на портфолио</span><input name="portfolio" placeholder="https://..."></label>
+    <div class="danger-zone">
+      <div><b>Очистить список</b><span>Удалить всех со статусом «Новый». Те, кому вы написали, останутся.</span></div>
+      <button type="button" class="btn btn-ghost btn-sm danger" id="btn-clear-new">Очистить</button>
+    </div>
     <div class="dialog-actions">
       <button type="button" class="btn btn-ghost" id="btn-logout" hidden style="margin-right:auto">Выйти</button>
       <button type="button" class="btn btn-ghost" id="settings-cancel">Отмена</button>

@@ -16,6 +16,7 @@ class Company(BaseModel):
     niche: str
     category: str
     address: str | None = None
+    city: str | None = None
     phone: str | None = None
     email: str | None = None
     website: str | None = None

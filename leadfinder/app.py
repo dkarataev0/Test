@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import audit, osm
-from .config import CITY, DB_PATH, NICHES, ROOT
+from .config import CITY, DB_PATH, NICHES, REGIONS, ROOT
 from .messages import build_messages
 from .mockup import THEMES, render_mockup
 from .models import Company
@@ -34,10 +34,14 @@ KINDS = {"no_site": "Нет сайта", "social_only": "Только соцсе
 
 class ScanRequest(BaseModel):
     niches: list[str] = list(NICHES)
+    region: str = "city"
+    limit: int | None = None  # сколько НОВЫХ компаний добавить; None - все
 
 
 class ImportRequest(BaseModel):
     elements: list[dict]
+    region: str = "city"
+    limit: int | None = None
 
 
 class UpdateRequest(BaseModel):
@@ -51,6 +55,16 @@ class LoginRequest(BaseModel):
 
 AUDIT_BATCH = 12  # сайтов за один запрос - укладываемся в лимит времени serverless-функции
 PUBLIC_PATHS = ("/login", "/api/login", "/api/health", "/mockup/", "/static/login")
+
+
+def telegram_rank(c: Company) -> int:
+    """2 - Telegram указан в карточке, 1 - мобильный номер (часто есть Telegram), 0 - нет."""
+    if c.socials.get("telegram"):
+        return 2
+    digits = "".join(ch for ch in c.phone or "" if ch.isdigit())
+    if len(digits) == 11 and digits[0] in "78" and digits[1] == "9":
+        return 1
+    return 0
 
 
 def create_app(storage: Storage | None = None, password: str | None = None) -> FastAPI:
@@ -103,7 +117,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return resp
 
     def card(c: Company) -> dict:
-        return {**c.model_dump(exclude={"audit"}), "priority": c.priority,
+        return {**c.model_dump(exclude={"audit"}), "priority": c.priority, "telegram": telegram_rank(c),
                 "score": c.audit.score if c.audit else None,
                 "issues_count": len(c.audit.issues) if c.audit else 0}
 
@@ -112,13 +126,22 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
 
     # Поиск идёт шагами по запросу из браузера: так он работает и локально,
     # и на хостинге, где фоновые задачи не живут дольше одного запроса.
+    def check_region(region: str):
+        if region not in REGIONS:
+            raise HTTPException(400, "Неизвестный регион")
+
     def check_niches(niches: list[str]):
         if not niches or any(n not in NICHES for n in niches):
             raise HTTPException(400, "Выберите хотя бы одну нишу")
 
-    def save_found(companies: list[Company]) -> dict:
-        # уже проверенные сайты не проверяем повторно
+    def save_found(companies: list[Company], limit: int | None = None) -> dict:
         known = {c.id: c for c in store.all()}
+        already = sum(1 for c in companies if c.id in known)
+        if limit:
+            # только новые, самые перспективные первыми
+            fresh = sorted((c for c in companies if c.id not in known), key=lambda c: -c.priority)
+            companies = fresh[:limit]
+        # уже проверенные сайты не проверяем повторно
         for c in companies:
             old = known.get(c.id)
             if old and old.audit and old.website == c.website:
@@ -126,27 +149,33 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         store.clear_demo()
         store.upsert(companies)
         store.set_meta("last_scan", dt.datetime.now().isoformat(timespec="minutes"))
-        return {"found": len(companies), "to_audit": sum(1 for c in companies if c.website and c.kind == "unchecked")}
+        return {"found": len(companies), "already": already,
+                "to_audit": sum(1 for c in companies if c.website and c.kind == "unchecked")}
 
     # Запрос к OpenStreetMap может делать сам браузер: с некоторых хостингов
     # серверы Overpass недоступны, а с телефона или компьютера - работают.
     @app.post("/api/scan/query")
     def scan_query(req: ScanRequest):
         check_niches(req.niches)
-        return {"query": osm.build_query(req.niches), "servers": osm.OVERPASS_URLS}
+        check_region(req.region)
+        return {"query": osm.build_query(req.niches, req.region), "servers": osm.OVERPASS_URLS,
+                "timeout": 180 if req.region == "krai" else 120}
 
     @app.post("/api/scan/import")
     def scan_import(req: ImportRequest):
-        return save_found(osm.parse_elements(req.elements))
+        check_region(req.region)
+        found = osm.parse_elements(req.elements, osm.default_city_for(req.region))
+        return save_found(found, req.limit)
 
     @app.post("/api/scan/search")
     async def scan_search(req: ScanRequest):
         check_niches(req.niches)
+        check_region(req.region)
         try:
-            companies = await osm.fetch_companies(req.niches, CITY)
+            companies = await osm.fetch_companies(req.niches, req.region)
         except RuntimeError as exc:
             raise HTTPException(502, str(exc))
-        return save_found(companies)
+        return save_found(companies, req.limit)
 
     @app.post("/api/scan/audit")
     async def scan_audit():
@@ -163,6 +192,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return {
             "city": CITY,
             "niches": {k: v["label"] for k, v in NICHES.items()},
+            "regions": {k: v["label"] for k, v in REGIONS.items()},
             "statuses": STATUSES, "kinds": KINDS,
             "themes": [t["name"] for t in THEMES],
             "total": len(items), "counts": counts,
@@ -181,7 +211,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return {"ok": True, "count": len(data)}
 
     @app.get("/api/companies")
-    def companies(niche: str = "", kind: str = "", status: str = "", q: str = ""):
+    def companies(niche: str = "", kind: str = "", status: str = "", q: str = "", sort: str = ""):
         items = store.all()
         if niche:
             items = [c for c in items if c.niche == niche]
@@ -195,8 +225,17 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             ql = q.lower()
             items = [c for c in items if ql in c.name.lower() or ql in (c.address or "").lower()
                      or ql in c.category.lower()]
-        items.sort(key=lambda c: (-c.priority, c.name))
+        if sort == "telegram":
+            # сначала с Telegram в карточке, потом с мобильным (часто есть Telegram), потом остальные
+            items.sort(key=lambda c: (-telegram_rank(c), -c.priority, c.name))
+        else:
+            items.sort(key=lambda c: (-c.priority, c.name))
         return [card(c) for c in items]
+
+    @app.post("/api/companies/clear-new")
+    def clear_new():
+        """Удаляет всех, кому ещё не писали. Компании со статусом остаются."""
+        return {"deleted": store.delete_new()}
 
     @app.get("/api/companies/{cid}")
     def company(cid: str):
@@ -215,13 +254,15 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return {"ok": True}
 
     @app.get("/mockup/{cid}", response_class=HTMLResponse)
-    def mockup(cid: str, variant: int = 0, download: bool = False):
+    def mockup(cid: str, variant: int | None = None, download: bool = False):
         c = store.get(cid)
         if not c:
             raise HTTPException(404, "Компания не найдена")
         headers = {}
         if download:
             headers["Content-Disposition"] = f'attachment; filename="mockup-{cid}.html"'
+        if variant is None:
+            variant = sum(map(ord, cid)) % 3  # как в интерфейсе: у каждой компании свой вид
         return HTMLResponse(render_mockup(c, CITY, variant), headers=headers)
 
     @app.get("/api/export.csv")

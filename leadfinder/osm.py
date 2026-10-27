@@ -4,7 +4,7 @@ import logging
 
 import httpx
 
-from .config import CITY, CITY_BBOX, NICHES, OVERPASS_BUDGET, OVERPASS_URLS, SOCIAL_DOMAINS
+from .config import CITY, NICHES, REGIONS, OVERPASS_BUDGET, OVERPASS_URLS, SOCIAL_DOMAINS
 
 USER_AGENT = "LeadFinder/1.0 (+https://github.com/dkarataev0/Test)"
 from .models import Company
@@ -21,13 +21,15 @@ SOCIAL_KEYS = {
 }
 
 
-def build_query(niches: list[str], bbox: str = CITY_BBOX) -> str:
-    parts = []
-    for niche in niches:
-        for (key, value) in NICHES[niche]["tags"]:
-            parts.append(f'  nwr["{key}"="{value}"]["name"];')
+def build_query(niches: list[str], region: str = "city") -> str:
+    reg = REGIONS[region]
+    scope = "(area.r)" if "area" in reg else ""
+    parts = [f'  nwr["{key}"="{value}"]["name"]{scope};'
+             for niche in niches for (key, value) in NICHES[niche]["tags"]]
     body = "\n".join(parts)
-    return f"[out:json][timeout:90][bbox:{bbox}];\n(\n{body}\n);\nout center tags;"
+    if "area" in reg:
+        return f"[out:json][timeout:180];\n{reg['area']}->.r;\n(\n{body}\n);\nout center tags;"
+    return f"[out:json][timeout:90][bbox:{reg['bbox']}];\n(\n{body}\n);\nout center tags;"
 
 
 def _clean_url(url: str) -> str:
@@ -65,7 +67,7 @@ def classify(tags: dict[str, str]) -> tuple[str, str] | None:
     return None
 
 
-def parse_elements(elements: list[dict]) -> list[Company]:
+def parse_elements(elements: list[dict], default_city: str | None = None) -> list[Company]:
     companies: dict[str, Company] = {}
     for el in elements:
         tags = el.get("tags") or {}
@@ -100,6 +102,7 @@ def parse_elements(elements: list[dict]) -> list[Company]:
             niche=niche,
             category=category,
             address=address,
+            city=(tags.get("addr:city") or "").strip() or default_city,
             phone=(tags.get("phone") or tags.get("contact:phone") or "").split(";")[0].strip() or None,
             email=(tags.get("email") or tags.get("contact:email") or "").split(";")[0].strip() or None,
             website=website,
@@ -114,9 +117,14 @@ def parse_elements(elements: list[dict]) -> list[Company]:
     return list(companies.values())
 
 
-async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -> list[Company]:
+def default_city_for(region: str) -> str | None:
+    """Город по умолчанию, если в карточке OSM он не указан."""
+    return CITY if region == "city" else None
+
+
+async def fetch_companies(niches: list[str], region: str = "city", on_status=None) -> list[Company]:
     """Опрашивает все зеркала Overpass параллельно и берёт первый успешный ответ."""
-    query = build_query(niches)
+    query = build_query(niches, region)
     timeout = httpx.Timeout(OVERPASS_BUDGET, connect=15)
     errors: list[str] = []
     if on_status:
@@ -136,7 +144,7 @@ async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -
         try:
             for fut in asyncio.as_completed(tasks):
                 try:
-                    return parse_elements(await fut)
+                    return parse_elements(await fut, default_city_for(region))
                 except (httpx.HTTPError, ValueError) as exc:
                     reason = (f"HTTP {exc.response.status_code}" if isinstance(exc, httpx.HTTPStatusError)
                               else type(exc).__name__ if not str(exc) else str(exc)[:120])

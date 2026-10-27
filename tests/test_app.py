@@ -12,9 +12,9 @@ def client(tmp_path):
 
 def test_empty_then_demo(client):
     assert client.get("/api/meta").json()["total"] == 0
-    assert client.post("/api/demo").json()["count"] == 24
+    assert client.post("/api/demo").json()["count"] == 12
     meta = client.get("/api/meta").json()
-    assert meta["demo"] and meta["total"] == 24
+    assert meta["demo"] and meta["total"] == 12
     leads = client.get("/api/companies", params={"kind": "leads"}).json()
     assert leads and all(c["kind"] != "ok" for c in leads)
     prios = [c["priority"] for c in leads]
@@ -43,7 +43,7 @@ def test_detail_messages_mockup_status(client):
 
 def test_filters_and_export(client):
     client.post("/api/demo")
-    assert all(c["niche"] == "auto" for c in client.get("/api/companies", params={"niche": "auto"}).json())
+    assert all(c["niche"] == "services" for c in client.get("/api/companies", params={"niche": "services"}).json())
     found = client.get("/api/companies", params={"q": "борода"}).json()
     assert [c["name"] for c in found] == ["Барбершоп «Борода»"]
     csv = client.get("/api/export.csv")
@@ -53,7 +53,7 @@ def test_filters_and_export(client):
 def test_mockup_escapes_html(client, tmp_path):
     from leadfinder.models import Company
     store = Storage(tmp_path / "x.db")
-    store.upsert([Company(id="n1", name="<script>alert(1)</script>", niche="food", category="Кафе", kind="no_site")])
+    store.upsert([Company(id="n1", name="<script>alert(1)</script>", niche="services", category="Цветы", kind="no_site")])
     html = TestClient(create_app(store)).get("/mockup/n1").text
     assert "<script>alert(1)</script>" not in html
 
@@ -61,7 +61,7 @@ def test_mockup_escapes_html(client, tmp_path):
 def test_scan_reports_unreachable_overpass(client, monkeypatch):
     from leadfinder import osm
     monkeypatch.setattr(osm, "OVERPASS_URLS", ["http://127.0.0.1:9/api"])
-    r = client.post("/api/scan/search", json={"niches": ["food"]})
+    r = client.post("/api/scan/search", json={"niches": ["services"]})
     assert r.status_code == 502 and "OpenStreetMap" in r.json()["detail"]
 
 
@@ -83,8 +83,8 @@ def test_scan_steps_search_then_audit(client, monkeypatch):
     monkeypatch.setattr(osm, "fetch_companies", fake_fetch)
     monkeypatch.setattr(audit, "audit_companies", fake_audit)
     client.post("/api/demo")
-    r = client.post("/api/scan/search", json={"niches": ["food"]}).json()
-    assert r == {"found": 3, "to_audit": 1}
+    r = client.post("/api/scan/search", json={"niches": ["services"]}).json()
+    assert r == {"found": 3, "already": 0, "to_audit": 1}
     meta = client.get("/api/meta").json()
     assert meta["total"] == 3 and not meta["demo"] and meta["pending_audit"] == 1
 
@@ -92,7 +92,7 @@ def test_scan_steps_search_then_audit(client, monkeypatch):
     assert r["checked"] == 1 and r["remaining"] == 0
     assert client.post("/api/scan/audit").json()["checked"] == 0
     # повторный поиск не сбрасывает уже сделанную проверку
-    assert client.post("/api/scan/search", json={"niches": ["food"]}).json()["to_audit"] == 0
+    assert client.post("/api/scan/search", json={"niches": ["services"]}).json()["to_audit"] == 0
 
 
 def test_password_protects_app(tmp_path):
@@ -114,10 +114,45 @@ def test_password_protects_app(tmp_path):
 def test_scan_query_and_import(client):
     import json
     from pathlib import Path
-    q = client.post("/api/scan/query", json={"niches": ["food"]}).json()
+    q = client.post("/api/scan/query", json={"niches": ["services"]}).json()
     assert "[bbox:" in q["query"] and q["servers"]
     assert client.post("/api/scan/query", json={"niches": []}).status_code == 400
     sample = json.loads((Path(__file__).parent / "fixtures" / "overpass_sample.json").read_text())
     r = client.post("/api/scan/import", json={"elements": sample["elements"]}).json()
-    assert r == {"found": 3, "to_audit": 1}
+    assert r == {"found": 3, "already": 0, "to_audit": 1}
     assert client.get("/api/meta").json()["total"] == 3
+
+
+def test_import_limit_takes_only_new_and_best(client):
+    import json
+    from pathlib import Path
+    sample = json.loads((Path(__file__).parent / "fixtures" / "overpass_sample.json").read_text())
+    r = client.post("/api/scan/import", json={"elements": sample["elements"], "limit": 1}).json()
+    assert r["found"] == 1
+    first = client.get("/api/companies").json()
+    assert [c["name"] for c in first] == ["Локон"]  # без сайта - самый перспективный
+    r = client.post("/api/scan/import", json={"elements": sample["elements"], "limit": 5}).json()
+    assert r == {"found": 2, "already": 1, "to_audit": 1}
+    assert client.post("/api/scan/import", json={"elements": [], "region": "moon"}).status_code == 400
+
+
+def test_city_from_osm_and_messages_use_it(client):
+    el = {"type": "node", "id": 7, "lat": 44.9, "lon": 37.3,
+          "tags": {"shop": "florist", "name": "Роза", "addr:city": "Анапа", "phone": "+79001112233"}}
+    client.post("/api/scan/import", json={"elements": [el], "region": "krai"})
+    d = client.get("/api/companies/n7").json()
+    assert d["city"] == "Анапа"
+    assert "в Анапе" in d["messages"][0]["text"] and "Краснодар" not in d["messages"][0]["text"]
+    assert "Анап" in client.get("/mockup/n7").text
+
+
+def test_telegram_sort_and_clear_new(client):
+    import json
+    from pathlib import Path
+    sample = json.loads((Path(__file__).parent / "fixtures" / "overpass_sample.json").read_text())
+    client.post("/api/scan/import", json={"elements": sample["elements"]})
+    names = [c["name"] for c in client.get("/api/companies", params={"sort": "telegram"}).json()]
+    assert names[0] == "Зерно"  # у него Telegram в карточке
+    client.patch("/api/companies/n101", json={"status": "contacted"})
+    assert client.post("/api/companies/clear-new").json() == {"deleted": 2}
+    assert [c["id"] for c in client.get("/api/companies").json()] == ["n101"]

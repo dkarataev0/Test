@@ -128,7 +128,7 @@ async function loadMeta() {
 
 async function loadList() {
   const f = state.filters;
-  const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q });
+  const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q, sort: f.sort || "" });
   state.items = await api("/api/companies?" + qs);
   renderGrid();
 }
@@ -184,10 +184,10 @@ function renderGrid() {
     <button class="company appear" data-id="${esc(c.id)}" style="animation-delay:${Math.min(i, 16) * 35}ms">
       <div class="c-top">
         <span class="cat"><span class="cat-ic">${icon(c.niche, 14)}</span>${esc(c.category)}</span>
-        ${kindBadge(c)}
+        <span class="badges">${c.telegram === 2 ? '<span class="tg-badge" title="Telegram в карточке">TG</span>' : ""}${kindBadge(c)}</span>
       </div>
       <h3>${esc(c.name)}</h3>
-      <span class="addr">${icon("pin", 14)}${esc(c.address || "Адрес не указан")}</span>
+      <span class="addr">${icon("pin", 14)}${esc([c.city && c.city !== state.meta.city ? c.city : "", c.address].filter(Boolean).join(", ") || c.city || "Адрес не указан")}</span>
       <div class="c-bottom">
         <span class="contacts-ic">${Object.entries(has).map(([k, on]) => `<span class="${on ? "on" : ""}" title="${{ phone: "Телефон", chat: "Мессенджер", mail: "Email", globe: "Сайт", link: "Соцсети" }[k]}">${icon(k, 14)}</span>`).join("")}</span>
         <span class="status-dot st-${c.status}"><i></i>${esc(meta.statuses[c.status])}</span>
@@ -197,15 +197,18 @@ function renderGrid() {
 }
 
 /* ---------- Карточка компании ---------- */
+// У каждой компании свой вариант макета по умолчанию, чтобы соседние сайты не были похожи
+const defaultVariant = id => [...id].reduce((s, ch) => s + ch.charCodeAt(0), 0) % 3;
+
 async function openCompany(id) {
   state.current = await api(`/api/companies/${encodeURIComponent(id)}`);
   state.tab = "overview";
   state.channel = "all";
-  state.variant = 0;
+  state.variant = defaultVariant(id);
   const c = state.current;
   $("#d-meta").innerHTML = `<span class="cat"><span class="cat-ic">${icon(c.niche, 14)}</span>${esc(c.category)}</span>${kindBadge({ ...c, score: c.audit?.score })}${c.demo ? '<span class="badge unchecked">демо</span>' : ""}`;
   $("#d-name").textContent = c.name;
-  $("#d-address").textContent = [state.meta.city, c.address].filter(Boolean).join(", ");
+  $("#d-address").textContent = [c.city || state.meta.city, c.address].filter(Boolean).join(", ");
   renderTab();
   $("#overlay").hidden = false;
   const d = $("#drawer");
@@ -449,14 +452,19 @@ async function startScan(e) {
   if (scanning) return;
   const niches = [...document.querySelectorAll("#scan-niches input:checked")].map(i => i.value);
   if (!niches.length) { toast("Выберите хотя бы одну нишу"); return; }
+  const region = document.querySelector("#scan-region input:checked").value;
+  const limit = $("#scan-limit").value ? +$("#scan-limit").value : null;
   scanning = true;
   $("#scan-start").disabled = true;
   try {
-    setProgress(null, `Ищу компании (${state.meta.city}) в OpenStreetMap… это может занять до 2 минут`);
-    const found = await searchCompanies(niches);
+    const where = state.meta.regions[region];
+    setProgress(null, `Ищу компании (${where}) в OpenStreetMap…${region === "krai" ? " Весь край ищется дольше, до 3 минут" : " Это может занять до 2 минут"}`);
+    const found = await searchCompanies(niches, region, limit);
     await Promise.all([loadMeta(), loadList()]);
     if ($("#scan-audit").checked) await auditSites(found.to_audit);
-    setProgress(100, `Готово: найдено ${found.found} ${plural(found.found, "компания", "компании", "компаний")}`);
+    setProgress(100, found.found
+      ? `Готово: добавлено ${found.found} ${plural(found.found, "новая компания", "новые компании", "новых компаний")}${found.already ? `, ещё ${found.already} уже были в списке` : ""}`
+      : `Новых компаний не нашлось${found.already ? `: все ${found.already} уже в списке` : ""}. Попробуйте другой регион или ниши.`);
     await Promise.all([loadMeta(), loadList()]);
     toast("Поиск завершён");
   } catch (err) {
@@ -468,11 +476,19 @@ async function startScan(e) {
 }
 // Сначала браузер сам спрашивает OpenStreetMap (все зеркала параллельно, берём первый ответ),
 // если не вышло - просим сервер.
-async function searchCompanies(niches) {
-  const body = JSON.stringify({ niches });
-  const { query, servers } = await api("/api/scan/query", { method: "POST", body });
+// Оставляем только нужные теги, чтобы не гонять лишнее (весь край - десятки тысяч объектов)
+const KEEP_TAG = /^(name|shop|amenity|craft|leisure|office|brand|brand:wikidata|addr:.+|phone|email|website|url|opening_hours|contact:.+|vk|instagram|telegram|whatsapp|facebook)$/;
+const slimElement = e => ({
+  type: e.type, id: e.id, lat: e.lat, lon: e.lon, center: e.center,
+  tags: Object.fromEntries(Object.entries(e.tags || {}).filter(([k]) => KEEP_TAG.test(k))),
+});
+const hasSite = e => !!(e.tags.website || e.tags["contact:website"] || e.tags.url);
+
+async function searchCompanies(niches, region, limit) {
+  const body = JSON.stringify({ niches, region, limit });
+  const { query, servers, timeout } = await api("/api/scan/query", { method: "POST", body });
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 120000);
+  const timer = setTimeout(() => ctrl.abort(), (timeout || 120) * 1000);
   const ask = async url => {
     const r = await fetch(url, { method: "POST", body: new URLSearchParams({ data: query }), signal: ctrl.signal });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -484,13 +500,22 @@ async function searchCompanies(niches) {
   try { elements = await Promise.any(servers.map(ask)); }
   catch { elements = null; }
   finally { clearTimeout(timer); ctrl.abort(); }
-  if (elements) {
-    setProgress(null, `Получено объектов: ${elements.length}. Сохраняю…`);
-    const slim = elements.map(e => ({ type: e.type, id: e.id, lat: e.lat, lon: e.lon, center: e.center, tags: e.tags }));
-    return api("/api/scan/import", { method: "POST", body: JSON.stringify({ elements: slim }) });
+  if (!elements) {
+    setProgress(null, "Прямой запрос не удался, пробую через сервер…");
+    return api("/api/scan/search", { method: "POST", body });
   }
-  setProgress(null, "Прямой запрос не удался, пробую через сервер…");
-  return api("/api/scan/search", { method: "POST", body });
+  // Сначала без сайта (самые перспективные), отправляем частями
+  const slim = elements.map(slimElement).filter(e => e.tags.name).sort((a, b) => hasSite(a) - hasSite(b));
+  const total = { found: 0, already: 0, to_audit: 0 };
+  const CHUNK = 2000;
+  for (let i = 0; i < slim.length; i += CHUNK) {
+    const left = limit ? limit - total.found : null;
+    if (limit && left <= 0) break;
+    setProgress(Math.round(i / slim.length * 100), `Найдено объектов: ${slim.length}. Сохраняю новые…`);
+    const r = await api("/api/scan/import", { method: "POST", body: JSON.stringify({ elements: slim.slice(i, i + CHUNK), region, limit: left }) });
+    total.found += r.found; total.already += r.already; total.to_audit += r.to_audit;
+  }
+  return total;
 }
 
 async function auditSites(total) {
@@ -527,6 +552,14 @@ function bind() {
   $("#q").addEventListener("input", e => { clearTimeout(qTimer); qTimer = setTimeout(() => { state.filters.q = e.target.value.trim(); loadList(); }, 200); });
   $("#niche-filter").addEventListener("change", e => { state.filters.niche = e.target.value; loadList(); });
   $("#status-filter").addEventListener("change", e => { state.filters.status = e.target.value; loadList(); });
+  $("#sort-select").addEventListener("change", e => { state.filters.sort = e.target.value; loadList(); });
+  $("#btn-clear-new").addEventListener("click", async () => {
+    if (!confirm(`Удалить всех со статусом «Новый»? Компании, которым вы написали, останутся.`)) return;
+    const r = await api("/api/companies/clear-new", { method: "POST" });
+    toast(`Удалено: ${r.deleted}`);
+    $("#settings-dialog").close();
+    await Promise.all([loadMeta(), loadList()]);
+  });
 
   document.addEventListener("click", e => {
     const t = e.target.closest("[data-kind], .company, [data-action], [data-copy], [data-copy-msg], [data-status], [data-channel], [data-variant], [data-device], .tabs button");

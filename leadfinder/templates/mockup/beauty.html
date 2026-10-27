@@ -8,7 +8,7 @@
 .top nav a:hover { color: var(--ink); }
 
 .hero { padding: 18px 0 96px; }
-.hero .wrap { display: grid; grid-template-columns: 1fr 1.05fr; gap: 64px; align-items: center; }
+.v0 .hero .wrap { display: grid; grid-template-columns: 1fr 1.05fr; gap: 64px; align-items: center; }
 .arch { border-radius: 999px 999px 28px 28px; overflow: hidden; aspect-ratio: 4 / 5; background: var(--soft); }
 .arch img { width: 100%; height: 100%; object-fit: cover; }
 .hero h1 { font: 400 clamp(44px, 6.4vw, 84px)/1.02 var(--display); letter-spacing: -.02em; margin-bottom: 22px; overflow-wrap: anywhere; }
@@ -53,8 +53,47 @@
 .gallery img { width: 100%; object-fit: cover; border-radius: 999px 999px 20px 20px; aspect-ratio: 3 / 4; }
 .gallery img:first-child { aspect-ratio: 4 / 5; }
 
+/* Вариант 2: журнал */
+.kicker { color: var(--accent); font-weight: 700; margin-bottom: 10px; }
+.mag { padding-top: 24px; }
+.mag h1 { font-size: clamp(44px, 8.4vw, 132px); line-height: .95; letter-spacing: -.04em; margin-bottom: 40px; overflow-wrap: normal; }
+.mag-grid { display: grid; grid-template-columns: 1.15fr 1fr .55fr; gap: 32px; align-items: start; }
+.mag-main { border-radius: 28px; overflow: hidden; aspect-ratio: 4 / 5; }
+.mag-main img { width: 100%; height: 115%; object-fit: cover; }
+.mag-small { margin-top: 140px; border-radius: 999px; overflow: hidden; aspect-ratio: 1 / 1.6; }
+.mag-small img { width: 100%; height: 100%; object-fit: cover; }
+.v1 .price-row h3 { font-size: 30px; }
+.v1 .visit { background: var(--accent); color: var(--accent-ink); }
+.v1 .visit .sub, .v1 .visit .step p { color: inherit; opacity: .8; }
+.v1 .step::before { color: var(--accent-ink); }
+
+/* Вариант 3: тёмная студия */
+.studio { position: relative; min-height: min(100vh, 860px); padding: 0; color: #fff; overflow: hidden; display: flex; flex-direction: column; }
+.studio-bg { position: absolute; inset: -6% 0 auto; width: 100%; height: 112%; object-fit: cover; }
+.studio::after { content: ""; position: absolute; inset: 0; z-index: 0; background: linear-gradient(180deg, rgba(10,8,14,.55), rgba(10,8,14,.35) 40%, rgba(10,8,14,.85)); }
+.studio > * { position: relative; z-index: 1; }
+.studio > .studio-bg { position: absolute; z-index: 0; }
+.top.on-photo .logo, .top.on-photo nav a { color: #fff; }
+.top.on-photo .btn.line { color: #fff; }
+.studio-in { flex: 1; display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: end; padding-bottom: 72px; }
+.studio h1 { font-size: clamp(44px, 7vw, 108px); line-height: .95; overflow-wrap: normal; }
+.studio .lead { color: rgba(255,255,255,.85); }
+.studio .kicker { color: #fff; opacity: .8; }
+.studio-book { display: flex; flex-direction: column; align-items: flex-end; gap: 18px; }
+.studio > .wrap { width: 100%; }
+.studio .spin-badge { color: #fff; position: relative; z-index: 2; margin: 0 -24px -60px 0; }
+.studio .book { width: 100%; color: var(--ink); }
+.v2 .price-row:hover h3 { color: var(--accent); }
+.v2 .price-row h3 { transition: color .3s; }
+
 @media (max-width: 900px) {
-  .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .mag-grid { grid-template-columns: minmax(0, 1fr); }
+  .mag-small { display: none; }
+  .mag-main { aspect-ratio: 4 / 3; }
+  .studio-in { grid-template-columns: minmax(0, 1fr); padding-bottom: 40px; padding-top: 40px; }
+  .studio-book { align-items: stretch; }
+  .studio .spin-badge { display: none; }
+  .v0 .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .days button, .slots button { padding: 9px 10px; font-size: 14px; }
   .book { padding: 20px; }
   .arch { aspect-ratio: 1 / 1; max-height: 420px; width: 100%; }
@@ -72,33 +111,81 @@
 {% endblock %}
 
 {% block body %}
-<header class="wrap top" id="top">
+{% macro booking() %}
+<div class="book" id="book">
+  <div class="form">
+    <h3>Свободное время</h3>
+    <div class="days" role="group" aria-label="День">
+      <button type="button" aria-pressed="true" data-day="0">Сегодня</button>
+      <button type="button" aria-pressed="false" data-day="1">Завтра</button>
+      <button type="button" aria-pressed="false" data-day="2">Послезавтра</button>
+    </div>
+    <div class="slots" role="group" aria-label="Время"></div>
+    <select aria-label="Услуга">{% for s in x.services %}<option>{{ s[0] }} - {{ s[3] }}</option>{% endfor %}</select>
+    <button class="btn" type="button" id="book-btn" disabled>Выберите время</button>
+  </div>
+  <div class="done" role="status"><strong>Вы записаны</strong><p id="done-text"></p></div>
+</div>
+{% endmacro %}
+{% macro topbar(extra="") %}
+<header class="wrap top {{ extra }}" id="top">
   <a class="logo" href="#top">{{ c.name }}</a>
   <nav><a href="#services">Услуги и цены</a><a href="#reviews">Отзывы</a><a href="#contacts">Контакты</a></nav>
   {% if c.phone %}<a class="btn line" href="tel:+{{ phone_digits }}">{{ c.phone }}</a>{% endif %}
 </header>
+{% endmacro %}
 
+{% if variant == 0 %}
+{{ topbar() }}
 <section class="hero"><div class="wrap">
-  <div class="arch"><img src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" fetchpriority="high"></div>
-  <div>
+  <div class="arch"><img class="intro-img" src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" fetchpriority="high"></div>
+  <div class="intro">
     <h1>{{ c.name }}</h1>
     <p class="lead">{{ x.lead }}</p>
-    <div class="book" id="book">
-      <div class="form">
-        <h3>Свободное время</h3>
-        <div class="days" role="group" aria-label="День">
-          <button type="button" aria-pressed="true" data-day="0">Сегодня</button>
-          <button type="button" aria-pressed="false" data-day="1">Завтра</button>
-          <button type="button" aria-pressed="false" data-day="2">Послезавтра</button>
-        </div>
-        <div class="slots" role="group" aria-label="Время"></div>
-        <select aria-label="Услуга">{% for s in x.services %}<option>{{ s[0] }} - {{ s[3] }}</option>{% endfor %}</select>
-        <button class="btn" type="button" id="book-btn" disabled>Выберите время</button>
-      </div>
-      <div class="done" role="status"><strong>Вы записаны</strong><p id="done-text"></p></div>
-    </div>
+    {{ booking() }}
   </div>
 </div></section>
+
+{% elif variant == 1 %}
+{{ topbar() }}
+<section class="hero mag">
+  <div class="wrap intro">
+    <p class="kicker">{{ c.category }}, {{ city }}</p>
+    <h1>{{ c.name }}</h1>
+  </div>
+  <div class="wrap mag-grid">
+    <figure class="mag-main"><img src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" data-parallax="-0.06" fetchpriority="high"></figure>
+    <div class="mag-side intro">
+      <p class="lead">{{ x.lead }}</p>
+      {{ booking() }}
+    </div>
+    {% if photos|length > 1 %}<figure class="mag-small"><img src="{{ photos[1] }}" alt="{{ c.name }}" data-reveal-img></figure>{% endif %}
+  </div>
+</section>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">{% for _ in range(2) %}{% for s in x.services %}<span>{{ s[0] }}</span>{% endfor %}{% endfor %}</div></div>
+
+{% else %}
+<section class="hero studio">
+  <img class="studio-bg" src="{{ photos[0] }}" alt="" data-parallax="0.25">
+  {{ topbar("on-photo") }}
+  <div class="wrap studio-in">
+    <div class="intro">
+      <p class="kicker">{{ c.category }} в {{ city_in }}</p>
+      <h1>{{ c.name }}</h1>
+      <p class="lead">{{ x.lead }}</p>
+    </div>
+    <div class="studio-book">
+      <div class="spin-badge" aria-hidden="true">
+        <svg viewBox="0 0 132 132"><defs><path id="circ" d="M66,66 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0"/></defs>
+          <text><textPath href="#circ">ОНЛАЙН-ЗАПИСЬ 24/7 • ОНЛАЙН-ЗАПИСЬ 24/7 •</textPath></text></svg>
+        <b>✦</b>
+      </div>
+      {{ booking() }}
+    </div>
+  </div>
+</section>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">{% for _ in range(2) %}{% for s in x.services %}<span>{{ s[0] }} {{ s[3] }}</span>{% endfor %}{% endfor %}</div></div>
+{% endif %}
 
 <section id="services"><div class="wrap">
   <h2>Услуги и цены</h2>

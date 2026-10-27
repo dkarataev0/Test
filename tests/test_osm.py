@@ -29,7 +29,9 @@ def test_kinds_and_fields():
 
 
 def test_query_contains_bbox_and_tags():
-    q = build_query(["beauty", "auto"], "44.9,38.8,45.2,39.2")
-    assert "[bbox:44.9,38.8,45.2,39.2]" in q
-    assert '["shop"="hairdresser"]' in q and '["shop"="car_repair"]' in q
-    assert '"cafe"' not in q
+    q = build_query(["beauty", "services"], "city")
+    assert "[bbox:" in q
+    assert '["shop"="hairdresser"]' in q and '["shop"="florist"]' in q
+    assert '"cafe"' not in q and '"car_repair"' not in q
+    krai = build_query(["beauty"], "krai")
+    assert 'area["ISO3166-2"="RU-KDA"]' in krai and "(area.r)" in krai

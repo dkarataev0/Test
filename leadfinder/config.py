@@ -11,6 +11,12 @@ CITY = os.getenv("LEADFINDER_CITY", "Краснодар")
 # Границы поиска: юг,запад,север,восток. Поиск по прямоугольнику в разы быстрее поиска по названию города.
 CITY_BBOX = os.getenv("LEADFINDER_BBOX", "44.97,38.82,45.19,39.22")
 
+# Где искать: город (быстро, по прямоугольнику) или весь край (по границе региона в OSM)
+REGIONS = {
+    "city": {"label": CITY, "bbox": CITY_BBOX},
+    "krai": {"label": "Краснодарский край", "area": 'area["ISO3166-2"="RU-KDA"]'},
+}
+
 OVERPASS_URLS = os.getenv("LEADFINDER_OVERPASS", ",".join([
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
@@ -33,27 +39,6 @@ NICHES = {
             ("shop", "tattoo"): "Тату-студия",
             ("amenity", "dentist"): "Стоматология",
             ("leisure", "fitness_centre"): "Фитнес",
-        },
-    },
-    "food": {
-        "label": "Еда",
-        "tags": {
-            ("amenity", "cafe"): "Кафе",
-            ("amenity", "restaurant"): "Ресторан",
-            ("amenity", "fast_food"): "Фастфуд",
-            ("shop", "bakery"): "Пекарня",
-            ("shop", "confectionery"): "Кондитерская",
-        },
-    },
-    "auto": {
-        "label": "Авто и ремонт",
-        "tags": {
-            ("shop", "car_repair"): "Автосервис",
-            ("shop", "tyres"): "Шиномонтаж",
-            ("amenity", "car_wash"): "Автомойка",
-            ("shop", "car_parts"): "Автозапчасти",
-            ("craft", "electronics_repair"): "Ремонт техники",
-            ("shop", "mobile_phone"): "Ремонт телефонов",
         },
     },
     "services": {
@@ -80,3 +65,8 @@ FREE_BUILDERS = (
     "tilda.ws", "wixsite.com", "ucoz.", "narod.ru", "nethouse.ru", "ukit.me",
     "jimdo", "blogspot.", "wordpress.com", "tb.ru", "mya5.ru", "uid.me",
 )
+
+
+def niche_of(niche: str) -> str:
+    """Ниша для текстов и макетов. Записи из удалённых ниш показываем как «услуги»."""
+    return niche if niche in NICHES else "services"

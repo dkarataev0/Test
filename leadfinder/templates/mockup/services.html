@@ -21,9 +21,36 @@ h2 { font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -.02em; }
 .cb { display: flex; gap: 10px; }
 .cb input { flex: 1; min-width: 0; height: 54px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--bg); padding: 0 16px; font-size: 16px; }
 .cb-ok { display: none; font-weight: 700; color: var(--accent); }
-.panel.sent .cb { display: none; }
-.panel.sent .cb-ok { display: block; }
-.panel small { display: block; color: var(--muted); margin-top: 10px; font-size: 13px; }
+[data-cb].sent .cb { display: none; }
+[data-cb].sent .cb-ok { display: block; }
+[data-cb] small { display: block; color: var(--muted); margin-top: 10px; font-size: 13px; }
+
+/* Вариант 2: сплит */
+.split { display: grid; grid-template-columns: 1fr 1fr; min-height: min(86vh, 760px); }
+.split-l { background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; padding: 64px max(20px, calc((100vw - 1160px) / 2 + 20px)) 64px; padding-right: 56px; }
+.split-l .cat { color: var(--soft); }
+.split-l h1 { font: 600 clamp(36px, 5vw, 68px)/1.02 var(--display); letter-spacing: -.035em; margin-bottom: 18px; overflow-wrap: anywhere; }
+.split-l .lead { opacity: .85; margin-bottom: 26px; max-width: 44ch; }
+.split-l small, .split-l .cb-ok { color: inherit; opacity: .8; }
+.split-l .btn { background: var(--soft); color: var(--ink); }
+.split-l input { border-color: transparent; }
+.split-r { position: relative; overflow: hidden; }
+.split-r img { width: 100%; height: 115%; object-fit: cover; }
+.float-note { position: absolute; left: 28px; bottom: 28px; background: var(--surface); color: var(--ink); border-radius: 20px; padding: 16px 20px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5); display: grid; }
+.float-note b { font: 600 22px var(--display); color: var(--accent); }
+.float-note span { color: var(--muted); font-size: 14px; }
+
+/* Вариант 3: крупный шрифт */
+.bigtype { padding: 40px 0 96px; }
+.bigtype h1 { font: 600 clamp(44px, 9.5vw, 140px)/.92 var(--display); letter-spacing: -.05em; margin-bottom: 44px; overflow-wrap: anywhere; }
+.bt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+.bt-photo { position: relative; }
+.bt-photo img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%; }
+.bt-photo .spin-badge { position: absolute; right: 2%; bottom: 4%; color: var(--ink); background: var(--bg); border-radius: 50%; }
+.bt-text .lead { font-size: 21px; color: var(--muted); margin: 10px 0 26px; }
+.v2 .svc { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.v2 .svc-item { border: 1.5px solid var(--line); border-radius: 24px; padding: 26px; transition: transform .4s var(--ease), border-color .3s; }
+.v2 .svc-item:hover { transform: translateY(-4px); border-color: var(--accent); }
 
 .svc { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; }
 .svc-item { padding: 26px 0; border-top: 1.5px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; }
@@ -46,6 +73,13 @@ h2 { font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -.02em; }
 .contacts { background: color-mix(in srgb, var(--soft) 22%, var(--bg)); }
 
 @media (max-width: 860px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .split-r { height: 300px; order: -1; }
+  .split-l { padding: 40px 20px; }
+  .bt-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .bt-photo img { aspect-ratio: 4 / 3; border-radius: 28px; }
+  .bt-photo .spin-badge { width: 110px; height: 110px; }
+  .v2 .svc { grid-template-columns: 1fr; }
   .top nav { display: none; }
   .stage > img { height: 300px; border-radius: 24px; }
   .panel { position: relative; left: 0; bottom: 0; width: 100%; margin-top: -60px; padding: 24px; }
@@ -59,26 +93,68 @@ h2 { font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -.02em; }
 {% endblock %}
 
 {% block body %}
+{% macro callback() %}
+<form class="cb" onsubmit="event.preventDefault(); this.closest('[data-cb]').classList.add('sent')">
+  <input type="tel" placeholder="Ваш телефон" aria-label="Ваш телефон" required>
+  <button class="btn" type="submit">Перезвоните мне</button>
+</form>
+<p class="cb-ok" role="status">Спасибо! Перезвоним в течение 10 минут в рабочее время.</p>
+<small>Перезваниваем за 10 минут в рабочее время</small>
+{% endmacro %}
 <header class="wrap top" id="top">
   <a class="logo" href="#top"><i></i>{{ c.name }}</a>
   <nav><a href="#services">Услуги</a><a href="#reviews">Отзывы</a><a href="#contacts">Контакты</a></nav>
   {% if c.phone %}<a class="btn line" href="tel:+{{ phone_digits }}">{{ c.phone }}</a>{% endif %}
 </header>
 
+{% if variant == 0 %}
 <section class="hero"><div class="wrap stage">
-  <img src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" fetchpriority="high">
-  <div class="panel" id="callback">
+  <img class="intro-img" src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" fetchpriority="high">
+  <div class="panel intro" id="callback" data-cb>
     <span class="cat">{{ c.category }} в {{ city_in }}</span>
     <h1>{{ c.name }}</h1>
     <p class="lead">{{ x.lead }}</p>
-    <form class="cb" onsubmit="event.preventDefault(); this.parentElement.classList.add('sent')">
-      <input type="tel" placeholder="Ваш телефон" aria-label="Ваш телефон" required>
-      <button class="btn" type="submit">Перезвоните мне</button>
-    </form>
-    <p class="cb-ok" role="status">Спасибо! Перезвоним в течение 10 минут в рабочее время.</p>
-    <small>Перезваниваем за 10 минут в рабочее время</small>
+    {{ callback() }}
   </div>
 </div></section>
+
+{% elif variant == 1 %}
+<section class="split" style="padding:0">
+  <div class="split-l" id="callback" data-cb>
+    <div class="intro">
+      <span class="cat">{{ c.category }} в {{ city_in }}</span>
+      <h1>{{ c.name }}</h1>
+      <p class="lead">{{ x.lead }}</p>
+      {{ callback() }}
+    </div>
+  </div>
+  <div class="split-r">
+    <img src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" data-parallax="-0.08" fetchpriority="high">
+    <div class="float-note intro"><b>{{ x.services[0][3] }}</b><span>{{ x.services[0][0] }}</span></div>
+  </div>
+</section>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">{% for _ in range(2) %}{% for s in x.services %}<span>{{ s[0] }}</span>{% endfor %}{% endfor %}</div></div>
+
+{% else %}
+<section class="bigtype"><div class="wrap">
+  <h1 class="intro"><span>{{ c.name }}</span></h1>
+  <div class="bt-grid">
+    <div class="bt-photo">
+      <img src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" data-reveal-img fetchpriority="high">
+      <div class="spin-badge" aria-hidden="true">
+        <svg viewBox="0 0 132 132"><defs><path id="circ" d="M66,66 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0"/></defs>
+          <text><textPath href="#circ">ПЕРЕЗВОНИМ ЗА 10 МИНУТ • ПЕРЕЗВОНИМ ЗА 10 МИНУТ •</textPath></text></svg>
+        <b>☎</b>
+      </div>
+    </div>
+    <div class="bt-text intro" id="callback" data-cb>
+      <span class="cat">{{ c.category }} в {{ city_in }}</span>
+      <p class="lead">{{ x.lead }}</p>
+      {{ callback() }}
+    </div>
+  </div>
+</div></section>
+{% endif %}
 
 <section id="services"><div class="wrap">
   <h2>Услуги и цены</h2>

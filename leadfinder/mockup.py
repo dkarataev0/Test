@@ -5,8 +5,8 @@ from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from .config import ROOT
-from .messages import quoted
+from .config import ROOT, niche_of
+from .messages import prepositional, quoted
 from .mockup_content import SERVICES_PALETTE, content_for, photo
 from .models import Company
 
@@ -25,16 +25,6 @@ PALETTES = {
         _pal("#F2F4F1", "#FFFFFF", "#1F2A24", "#5C6B62", "#3F6B57", "#FFFFFF", "#E1E9E3", "#D5DED8"),
         _pal("#1D1A24", "#28242F", "#F3EEF4", "#B3A9B8", "#D9A7C0", "#1D1A24", "#2E2936", "#3B3543"),
     ],
-    "food": [
-        _pal("#FFFFFF", "#FFFFFF", "#1C1A17", "#5E5A52", "#1F3B2D", "#F4F0E6", "#F4E2B0", "#E6E2D8"),
-        _pal("#FFFFFF", "#FFFFFF", "#221A16", "#6A5B52", "#B3392A", "#FFF7EE", "#FBE3D6", "#EADBD2"),
-        _pal("#17191C", "#22252A", "#F2EFE9", "#A9A49B", "#E8B23A", "#17191C", "#2A2D33", "#33373E"),
-    ],
-    "auto": [
-        _pal("#EEF0F2", "#FFFFFF", "#1B2733", "#5B6672", "#FF6B1A", "#1B2733", "#E1E5E9", "#D3D9DF"),
-        _pal("#EEF1F6", "#FFFFFF", "#14213D", "#56617A", "#2F6BFF", "#FFFFFF", "#E0E6F0", "#D0D8E6"),
-        _pal("#F2F1EE", "#FFFFFF", "#222222", "#5F5D58", "#FFC21A", "#1B1B1B", "#E6E4DE", "#D8D6CF"),
-    ],
     "services": [
         None,  # подставляется палитра категории
         _pal("#F5F7F7", "#FFFFFF", "#132326", "#5A6668", "#0E6E73", "#FFFFFF", "#F6C344", "#E0E6E6"),
@@ -45,24 +35,17 @@ THEMES = [{"name": "Вариант 1"}, {"name": "Вариант 2"}, {"name": "
 
 FONTS = {
     "beauty": "family=Prata&family=Manrope:wght@400;500;600;700",
-    "food": "family=Dela+Gothic+One&family=Golos+Text:wght@400;500;600;700",
-    "auto": "family=Tektur:wght@500;700&family=Golos+Text:wght@400;500;600;700",
     "services": "family=Unbounded:wght@500;600&family=Manrope:wght@400;500;600;700;800",
 }
-CTA_ANCHOR = {"beauty": "book", "food": "menu", "auto": "calc", "services": "callback"}
+CTA_ANCHOR = {"beauty": "book", "services": "callback"}
 
 
 def palette(c: Company, variant: int) -> dict:
-    pal = PALETTES[c.niche][variant % 3]
+    pal = PALETTES[niche_of(c.niche)][variant % 3]
     if pal is None:
         main, second = SERVICES_PALETTE.get(c.category, ("#0E6E73", "#F6C344"))
         pal = _pal("#F7F8F6", "#FFFFFF", "#16201C", "#5D6763", main, "#FFFFFF", second, "#E3E6E3")
     return pal
-
-
-def prepositional(city: str) -> str:
-    """Краснодар → Краснодаре (для типичных названий на согласную)."""
-    return city + "е" if city and city[-1].lower() in "бвгдзклмнпрстфхцчшщ" else city
 
 
 DAYS = {"Mo": "Пн", "Tu": "Вт", "We": "Ср", "Th": "Чт", "Fr": "Пт", "Sa": "Сб", "Su": "Вс",
@@ -94,16 +77,19 @@ def phone_digits(phone: str | None) -> str:
 
 
 def render_mockup(c: Company, city: str, variant: int = 0) -> str:
-    x = content_for(c.niche, c.category)
+    city = c.city or city
+    niche = niche_of(c.niche)
+    variant = variant % 3
+    x = content_for(niche, c.category)
     map_url = None
     if c.lat and c.lon:
         d = 0.004
         map_url = ("https://www.openstreetmap.org/export/embed.html?bbox="
                    f"{c.lon - d},{c.lat - d},{c.lon + d},{c.lat + d}&layer=mapnik&marker={c.lat},{c.lon}")
     digits = phone_digits(c.phone)
-    return env.get_template(f"mockup/{c.niche}.html").render(
+    return env.get_template(f"mockup/{niche}.html").render(
         c=c, x=x, city=city, city_in=prepositional(city), year=dt.date.today().year,
-        p=palette(c, variant), fonts=FONTS[c.niche], cta_anchor=CTA_ANCHOR[c.niche],
+        variant=variant, p=palette(c, variant), fonts=FONTS[niche], cta_anchor=CTA_ANCHOR[niche],
         photos=[photo(k) for k in x["photos"]],
         hours=humanize_hours(c.opening_hours), map_url=map_url,
         phone_digits=digits, qname=quoted(c.name),

@@ -84,6 +84,12 @@ class Storage:
         if note is not None:
             self._exec("UPDATE companies SET note = %s WHERE id = %s", (note, cid))
 
+    def delete_new(self) -> int:
+        """Удаляет компании, с которыми ещё не работали (статус «Новый»). Возвращает их число."""
+        n = self._exec("SELECT count(*) FROM companies WHERE status = 'new'")[0][0]
+        self._exec("DELETE FROM companies WHERE status = 'new'")
+        return n
+
     def clear_demo(self) -> None:
         self._exec("DELETE FROM companies WHERE id LIKE 'demo%%'")
 
