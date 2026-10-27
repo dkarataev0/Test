@@ -372,7 +372,7 @@ async function startScan(e) {
   $("#scan-start").disabled = true;
   try {
     setProgress(null, `Ищу компании (${state.meta.city}) в OpenStreetMap… это может занять до 2 минут`);
-    const found = await api("/api/scan/search", { method: "POST", body: JSON.stringify({ niches }) });
+    const found = await searchCompanies(niches);
     await Promise.all([loadMeta(), loadList()]);
     if ($("#scan-audit").checked) await auditSites(found.to_audit);
     setProgress(100, `Готово: найдено ${found.found} ${plural(found.found, "компания", "компании", "компаний")}`);
@@ -385,6 +385,33 @@ async function startScan(e) {
     $("#scan-start").disabled = false;
   }
 }
+// Сначала браузер сам спрашивает OpenStreetMap (все зеркала параллельно, берём первый ответ),
+// если не вышло — просим сервер.
+async function searchCompanies(niches) {
+  const body = JSON.stringify({ niches });
+  const { query, servers } = await api("/api/scan/query", { method: "POST", body });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120000);
+  const ask = async url => {
+    const r = await fetch(url, { method: "POST", body: new URLSearchParams({ data: query }), signal: ctrl.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    if (!data.elements || (!data.elements.length && /error/i.test(data.remark || ""))) throw new Error(data.remark || "пустой ответ");
+    return data.elements;
+  };
+  let elements = null;
+  try { elements = await Promise.any(servers.map(ask)); }
+  catch { elements = null; }
+  finally { clearTimeout(timer); ctrl.abort(); }
+  if (elements) {
+    setProgress(null, `Получено объектов: ${elements.length}. Сохраняю…`);
+    const slim = elements.map(e => ({ type: e.type, id: e.id, lat: e.lat, lon: e.lon, center: e.center, tags: e.tags }));
+    return api("/api/scan/import", { method: "POST", body: JSON.stringify({ elements: slim }) });
+  }
+  setProgress(null, "Прямой запрос не удался, пробую через сервер…");
+  return api("/api/scan/search", { method: "POST", body });
+}
+
 async function auditSites(total) {
   total = Math.max(total, 1);
   let remaining = total;

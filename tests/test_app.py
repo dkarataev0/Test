@@ -109,3 +109,15 @@ def test_password_protects_app(tmp_path):
     anon = TestClient(c.app)
     assert anon.get("/mockup/demo1").status_code == 200
     assert anon.get("/api/companies").status_code == 401
+
+
+def test_scan_query_and_import(client):
+    import json
+    from pathlib import Path
+    q = client.post("/api/scan/query", json={"niches": ["food"]}).json()
+    assert "[bbox:" in q["query"] and q["servers"]
+    assert client.post("/api/scan/query", json={"niches": []}).status_code == 400
+    sample = json.loads((Path(__file__).parent / "fixtures" / "overpass_sample.json").read_text())
+    r = client.post("/api/scan/import", json={"elements": sample["elements"]}).json()
+    assert r == {"found": 3, "to_audit": 1}
+    assert client.get("/api/meta").json()["total"] == 3

@@ -93,7 +93,7 @@ async def audit_site(client: httpx.AsyncClient, insecure: httpx.AsyncClient, url
         r = await _get(insecure, url)
         bad_cert = r is not None and str(r.url).startswith("https://")
     if r is None:
-        return Audit(score=0, issues=["Сайт не открывается"])
+        return Audit(score=0, issues=["Сайт не открылся при проверке — откройте его сами, чтобы убедиться"])
     elapsed = time.monotonic() - start
     if r.status_code >= 400:
         return Audit(score=0, final_url=str(r.url),

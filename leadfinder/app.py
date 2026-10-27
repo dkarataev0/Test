@@ -36,6 +36,10 @@ class ScanRequest(BaseModel):
     niches: list[str] = list(NICHES)
 
 
+class ImportRequest(BaseModel):
+    elements: list[dict]
+
+
 class UpdateRequest(BaseModel):
     status: str | None = None
     note: str | None = None
@@ -78,25 +82,6 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         except StorageUnavailable as exc:
             return JSONResponse({"ok": False, "error": str(exc)}, status_code=503)
 
-    @app.get("/api/diag/overpass")
-    async def diag_overpass():
-        """Временная диагностика доступности зеркал Overpass с сервера."""
-        import time
-        import httpx
-        urls = osm.OVERPASS_URLS + ["https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-                                    "https://overpass.osm.ch/api/interpreter"]
-        out = {}
-        async with httpx.AsyncClient(timeout=20, headers={"User-Agent": osm.USER_AGENT}) as c:
-            async def one(u):
-                t = time.monotonic()
-                try:
-                    r = await c.post(u, data={"data": "[out:json];node(1);out;"})
-                    out[u] = f"{r.status_code} {time.monotonic() - t:.1f}s {r.text[:80]!r}"
-                except Exception as e:
-                    out[u] = f"{type(e).__name__} {time.monotonic() - t:.1f}s"
-            await asyncio.gather(*(one(u) for u in urls))
-        return out
-
     @app.get("/login", response_class=HTMLResponse)
     def login_page():
         return (ROOT / "static" / "login.html").read_text(encoding="utf-8")
@@ -127,14 +112,11 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
 
     # Поиск идёт шагами по запросу из браузера: так он работает и локально,
     # и на хостинге, где фоновые задачи не живут дольше одного запроса.
-    @app.post("/api/scan/search")
-    async def scan_search(req: ScanRequest):
-        if not req.niches or any(n not in NICHES for n in req.niches):
+    def check_niches(niches: list[str]):
+        if not niches or any(n not in NICHES for n in niches):
             raise HTTPException(400, "Выберите хотя бы одну нишу")
-        try:
-            companies = await osm.fetch_companies(req.niches, CITY)
-        except RuntimeError as exc:
-            raise HTTPException(502, str(exc))
+
+    def save_found(companies: list[Company]) -> dict:
         # уже проверенные сайты не проверяем повторно
         known = {c.id: c for c in store.all()}
         for c in companies:
@@ -145,6 +127,26 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         store.upsert(companies)
         store.set_meta("last_scan", dt.datetime.now().isoformat(timespec="minutes"))
         return {"found": len(companies), "to_audit": sum(1 for c in companies if c.website and c.kind == "unchecked")}
+
+    # Запрос к OpenStreetMap может делать сам браузер: с некоторых хостингов
+    # серверы Overpass недоступны, а с телефона или компьютера — работают.
+    @app.post("/api/scan/query")
+    def scan_query(req: ScanRequest):
+        check_niches(req.niches)
+        return {"query": osm.build_query(req.niches), "servers": osm.OVERPASS_URLS}
+
+    @app.post("/api/scan/import")
+    def scan_import(req: ImportRequest):
+        return save_found(osm.parse_elements(req.elements))
+
+    @app.post("/api/scan/search")
+    async def scan_search(req: ScanRequest):
+        check_niches(req.niches)
+        try:
+            companies = await osm.fetch_companies(req.niches, CITY)
+        except RuntimeError as exc:
+            raise HTTPException(502, str(exc))
+        return save_found(companies)
 
     @app.post("/api/scan/audit")
     async def scan_audit():
