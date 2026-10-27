@@ -466,9 +466,10 @@ async function startScan(e) {
       ? `Готово: добавлено ${found.found} ${plural(found.found, "новая компания", "новые компании", "новых компаний")}${found.already ? `, ещё ${found.already} уже были в списке` : ""}`
       : `Новых компаний не нашлось${found.already ? `: все ${found.already} уже в списке` : ""}. Попробуйте другой регион или ниши.`);
     await Promise.all([loadMeta(), loadList()]);
-    toast("Поиск завершён");
+    toast(found.failed?.length ? "Поиск завершён, но часть ниш не загрузилась" : "Поиск завершён");
   } catch (err) {
     setProgress(0, err.message, true);
+    api("/api/log", { method: "POST", body: JSON.stringify({ event: "scan_error", message: err.message }) }).catch(() => {});
   } finally {
     scanning = false;
     $("#scan-start").disabled = false;
@@ -484,29 +485,62 @@ const slimElement = e => ({
 });
 const hasSite = e => !!(e.tags.website || e.tags["contact:website"] || e.tags.url);
 
+// Один запрос к OpenStreetMap: все зеркала параллельно, берём первый ответ.
+// Если не ответил никто, возвращаем причины по каждому серверу.
+async function overpass(query, servers, timeoutSec) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutSec * 1000);
+  const reasons = {};
+  const ask = async url => {
+    const host = new URL(url).host;
+    try {
+      const r = await fetch(url, { method: "POST", body: new URLSearchParams({ data: query }), signal: ctrl.signal });
+      if (!r.ok) throw new Error(r.status === 429 ? "занят (429)" : r.status === 504 ? "перегружен (504)" : `ошибка ${r.status}`);
+      const data = await r.json();
+      if (!data.elements || (!data.elements.length && /error|timed out/i.test(data.remark || ""))) throw new Error(data.remark ? "не успел (тайм-аут)" : "пустой ответ");
+      return data.elements;
+    } catch (e) {
+      if (!(host in reasons)) reasons[host] = e.name === "AbortError" ? "нет ответа" : (e.message === "Failed to fetch" ? "недоступен" : e.message);
+      throw e;
+    }
+  };
+  try { return { elements: await Promise.any(servers.map(ask)) }; }
+  catch { return { reasons }; }
+  finally { clearTimeout(timer); ctrl.abort(); }
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reasonText = reasons => Object.entries(reasons).map(([h, r]) => `${h}: ${r}`).join("; ");
+
 async function searchCompanies(niches, region, limit) {
   const body = JSON.stringify({ niches, region, limit });
-  const { query, servers, timeout } = await api("/api/scan/query", { method: "POST", body });
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), (timeout || 120) * 1000);
-  const ask = async url => {
-    const r = await fetch(url, { method: "POST", body: new URLSearchParams({ data: query }), signal: ctrl.signal });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-    if (!data.elements || (!data.elements.length && /error/i.test(data.remark || ""))) throw new Error(data.remark || "пустой ответ");
-    return data.elements;
-  };
-  let elements = null;
-  try { elements = await Promise.any(servers.map(ask)); }
-  catch { elements = null; }
-  finally { clearTimeout(timer); ctrl.abort(); }
-  if (!elements) {
-    setProgress(null, "Прямой запрос не удался, пробую через сервер…");
-    return api("/api/scan/search", { method: "POST", body });
+  const { queries, servers, timeout, server_fallback } = await api("/api/scan/query", { method: "POST", body });
+  const byId = new Map();
+  const failed = [];
+  for (const [n, q] of queries.entries()) {
+    let res = null;
+    for (let attempt = 1; attempt <= 3 && !res?.elements; attempt++) {
+      setProgress(null, `Ищу «${q.label}» в OpenStreetMap (${n + 1} из ${queries.length})${attempt > 1 ? `, попытка ${attempt}` : ""}…`);
+      res = await overpass(q.query, servers, timeout || 120);
+      if (!res.elements && attempt < 3) {
+        setProgress(null, `Серверы OpenStreetMap заняты, повторю через ${attempt * 10} секунд…`);
+        await sleep(attempt * 10000);
+      }
+    }
+    if (res.elements) res.elements.forEach(e => byId.set(e.type + e.id, e));
+    else failed.push(`${q.label}: ${reasonText(res.reasons)}`);
+  }
+  if (failed.length) await api("/api/log", { method: "POST", body: JSON.stringify({ event: "overpass_failed", region, details: failed }) }).catch(() => {});
+  if (!byId.size) {
+    if (server_fallback) {
+      setProgress(null, "Прямой запрос не удался, пробую через сервер…");
+      return api("/api/scan/search", { method: "POST", body });
+    }
+    throw new Error(`OpenStreetMap сейчас не отвечает. ${failed.join(" | ")}. Попробуйте ещё раз через 2-3 минуты.`);
   }
   // Сначала без сайта (самые перспективные), отправляем частями
-  const slim = elements.map(slimElement).filter(e => e.tags.name).sort((a, b) => hasSite(a) - hasSite(b));
-  const total = { found: 0, already: 0, to_audit: 0 };
+  const slim = [...byId.values()].map(slimElement).filter(e => e.tags.name).sort((a, b) => hasSite(a) - hasSite(b));
+  const total = { found: 0, already: 0, to_audit: 0, failed };
   const CHUNK = 2000;
   for (let i = 0; i < slim.length; i += CHUNK) {
     const left = limit ? limit - total.found : null;

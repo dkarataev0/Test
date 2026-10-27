@@ -156,3 +156,14 @@ def test_telegram_sort_and_clear_new(client):
     client.patch("/api/companies/n101", json={"status": "contacted"})
     assert client.post("/api/companies/clear-new").json() == {"deleted": 2}
     assert [c["id"] for c in client.get("/api/companies").json()] == ["n101"]
+
+
+def test_query_per_niche_and_client_log(client):
+    q = client.post("/api/scan/query", json={"niches": ["beauty", "services"]}).json()
+    assert [x["niche"] for x in q["queries"]] == ["beauty", "services"]
+    assert any("openstreetmap.ru" in s for s in q["servers"])
+    client.post("/api/log", json={"event": "overpass_failed", "details": ["Красота: overpass-api.de: занят (429)"]})
+    log = client.get("/api/log").json()
+    assert log[-1]["event"] == "overpass_failed" and "429" in log[-1]["details"][0]
+    html = client.get("/").text
+    assert "/static/app.js?v=" in html

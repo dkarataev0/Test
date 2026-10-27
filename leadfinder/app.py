@@ -158,8 +158,26 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
     def scan_query(req: ScanRequest):
         check_niches(req.niches)
         check_region(req.region)
-        return {"query": osm.build_query(req.niches, req.region), "servers": osm.OVERPASS_URLS,
-                "timeout": 180 if req.region == "krai" else 120}
+        return {"query": osm.build_query(req.niches, req.region),
+                # по нише отдельным запросом: так легче для серверов OpenStreetMap
+                "queries": [{"niche": n, "label": NICHES[n]["label"], "query": osm.build_query([n], req.region)}
+                            for n in req.niches],
+                "servers": osm.OVERPASS_URLS,
+                "timeout": 180 if req.region == "krai" else 120,
+                # на Vercel серверы OpenStreetMap недоступны, запасной путь через сервер там бесполезен
+                "server_fallback": os.getenv("VERCEL") != "1"}
+
+    @app.post("/api/log")
+    def client_log(entry: dict):
+        """Ошибки поиска из браузера: сохраняем последние 30, чтобы можно было разобраться."""
+        log_items = json.loads(store.get_meta("client_log") or "[]")
+        log_items.append({"at": dt.datetime.now().isoformat(timespec="seconds"), **entry})
+        store.set_meta("client_log", json.dumps(log_items[-30:], ensure_ascii=False))
+        return {"ok": True}
+
+    @app.get("/api/log")
+    def read_log():
+        return json.loads(store.get_meta("client_log") or "[]")
 
     @app.post("/api/scan/import")
     def scan_import(req: ImportRequest):
@@ -282,9 +300,14 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
 
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
+    # Версия в ссылках на CSS/JS, чтобы после обновления браузер не брал старый интерфейс из кэша
+    version = (os.getenv("VERCEL_GIT_COMMIT_SHA") or str(int((ROOT / "static" / "app.js").stat().st_mtime)))[:10]
+
     @app.get("/")
     def index():
-        return FileResponse(ROOT / "static" / "index.html")
+        html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+        html = html.replace("/static/style.css", f"/static/style.css?v={version}").replace("/static/app.js", f"/static/app.js?v={version}")
+        return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
     return app
 
