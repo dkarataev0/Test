@@ -49,7 +49,7 @@ class LoginRequest(BaseModel):
     password: str
 
 
-AUDIT_BATCH = 12  # сайтов за один запрос — укладываемся в лимит времени serverless-функции
+AUDIT_BATCH = 12  # сайтов за один запрос - укладываемся в лимит времени serverless-функции
 PUBLIC_PATHS = ("/login", "/api/login", "/api/health", "/mockup/", "/static/login")
 
 
@@ -129,7 +129,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         return {"found": len(companies), "to_audit": sum(1 for c in companies if c.website and c.kind == "unchecked")}
 
     # Запрос к OpenStreetMap может делать сам браузер: с некоторых хостингов
-    # серверы Overpass недоступны, а с телефона или компьютера — работают.
+    # серверы Overpass недоступны, а с телефона или компьютера - работают.
     @app.post("/api/scan/query")
     def scan_query(req: ScanRequest):
         check_niches(req.niches)

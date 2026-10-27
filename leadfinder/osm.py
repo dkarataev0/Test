@@ -73,7 +73,7 @@ def parse_elements(elements: list[dict]) -> list[Company]:
         found = classify(tags)
         if not name or not found:
             continue
-        # Сетевые бренды (есть brand/brand:wikidata) — не наш клиент
+        # Сетевые бренды (есть brand/brand:wikidata) - не наш клиент
         if tags.get("brand") or tags.get("brand:wikidata"):
             continue
         niche, category = found
@@ -146,6 +146,6 @@ async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -
             for t in tasks:
                 t.cancel()
     raise RuntimeError(
-        "Не удалось получить данные из OpenStreetMap — серверы Overpass не ответили "
+        "Не удалось получить данные из OpenStreetMap - серверы Overpass не ответили "
         f"({'; '.join(errors)}). Попробуйте ещё раз через пару минут."
     )

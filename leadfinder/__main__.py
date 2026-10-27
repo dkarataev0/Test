@@ -19,7 +19,7 @@ def local_ip() -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="LeadFinder — поиск клиентов на создание сайтов")
+    parser = argparse.ArgumentParser(description="LeadFinder - поиск клиентов на создание сайтов")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--no-browser", action="store_true", help="не открывать браузер")
     parser.add_argument("--phone", action="store_true",

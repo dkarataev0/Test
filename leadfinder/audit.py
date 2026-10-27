@@ -18,7 +18,7 @@ HEADERS = {
 
 # (ключ, штраф, текст проблемы для клиента)
 PENALTIES = {
-    "https": (15, "Нет защищённого соединения (HTTPS) — браузер пишет «Не защищено»"),
+    "https": (15, "Нет защищённого соединения (HTTPS) - браузер пишет «Не защищено»"),
     "mobile": (20, "Сайт не адаптирован под телефоны"),
     "fast": (10, "Сайт долго загружается"),
     "title": (5, "Нет заголовка страницы для поисковиков"),
@@ -30,7 +30,7 @@ PENALTIES = {
     "light": (5, "Страница слишком тяжёлая"),
 }
 
-YEAR_RE = re.compile(r"(?:©|&copy;|copyright|\(c\))\s*(?:\d{4}\s*[-–—]\s*)?((?:19|20)\d{2})", re.I)
+YEAR_RE = re.compile(r"(?:©|&copy;|copyright|\(c\))\s*(?:\d{4}\s*[-\u2013\u2014]\s*)?((?:19|20)\d{2})", re.I)
 
 
 def analyze_html(html: str, final_url: str, load_time: float, size: int,
@@ -67,7 +67,7 @@ def analyze_html(html: str, final_url: str, load_time: float, size: int,
             penalty, text = PENALTIES[key]
             score -= penalty
             if key == "fresh":
-                text += f" (последний год на сайте — {max(years)})"
+                text += f" (последний год на сайте - {max(years)})"
             if key == "fast":
                 text += f" ({load_time:.1f} с)"
             issues.append(text)
@@ -83,7 +83,7 @@ async def _get(client: httpx.AsyncClient, url: str) -> httpx.Response | None:
 
 
 async def audit_site(client: httpx.AsyncClient, insecure: httpx.AsyncClient, url: str) -> Audit:
-    """client проверяет сертификат; insecure — запасной, для сайтов с битым SSL."""
+    """client проверяет сертификат; insecure - запасной, для сайтов с битым SSL."""
     start = time.monotonic()
     r = await _get(client, url)
     bad_cert = False
@@ -93,7 +93,7 @@ async def audit_site(client: httpx.AsyncClient, insecure: httpx.AsyncClient, url
         r = await _get(insecure, url)
         bad_cert = r is not None and str(r.url).startswith("https://")
     if r is None:
-        return Audit(score=0, issues=["Сайт не открылся при проверке — откройте его сами, чтобы убедиться"])
+        return Audit(score=0, issues=["Сайт не открылся при проверке - откройте его сами, чтобы убедиться"])
     elapsed = time.monotonic() - start
     if r.status_code >= 400:
         return Audit(score=0, final_url=str(r.url),
@@ -102,7 +102,7 @@ async def audit_site(client: httpx.AsyncClient, insecure: httpx.AsyncClient, url
     if bad_cert:
         audit.score = max(audit.score - 40, 0)  # критично: браузер пугает посетителей
         audit.checks["https"] = False
-        audit.issues.insert(0, "Недействительный сертификат безопасности — браузер показывает предупреждение")
+        audit.issues.insert(0, "Недействительный сертификат безопасности - браузер показывает предупреждение")
     return audit
 
 

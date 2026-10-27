@@ -239,11 +239,11 @@ function renderOverview() {
   let auditHtml;
   const a = c.audit;
   if (c.kind === "no_site") {
-    auditHtml = `<div class="score"><div class="ring" style="--v:0"><b>—</b></div><div><strong>Сайта нет</strong><p>Компания есть на карте, но клиенты не могут найти её в поиске Яндекса и Google.</p></div></div>
+    auditHtml = `<div class="score"><div class="ring" style="--v:0"><b>-</b></div><div><strong>Сайта нет</strong><p>Компания есть на карте, но клиенты не могут найти её в поиске Яндекса и Google.</p></div></div>
       <div class="pitch">Лучший повод: предложите сайт-визитку с прайсом и онлайн-записью и покажите готовый макет.</div>`;
   } else if (c.kind === "social_only") {
-    auditHtml = `<div class="score"><div class="ring" style="--v:15;--c:var(--warning)"><b>—</b></div><div><strong>Только соцсети</strong><p>Вместо сайта — страница в соцсетях. В поиске её почти не видно.</p></div></div>
-      <div class="pitch">Повод: «соцсети + сайт» — сайт приводит клиентов из поиска, а соцсети удерживают.</div>`;
+    auditHtml = `<div class="score"><div class="ring" style="--v:15;--c:var(--warning)"><b>-</b></div><div><strong>Только соцсети</strong><p>Вместо сайта - страница в соцсетях. В поиске её почти не видно.</p></div></div>
+      <div class="pitch">Повод: «соцсети + сайт» - сайт приводит клиентов из поиска, а соцсети удерживают.</div>`;
   } else if (a) {
     const color = a.score >= 60 ? "var(--success)" : a.score >= 35 ? "var(--orange)" : "var(--danger)";
     const verdict = !a.reachable ? "Сайт не открылся" : a.score >= 60 ? "Сайт в порядке" : a.score >= 35 ? "Требует обновления" : "Сайт сильно устарел";
@@ -264,7 +264,7 @@ function renderOverview() {
     <div class="row2">
       <div class="panel">
         <h4>Контакты</h4>
-        ${rows.length ? `<div class="c-items">${rows.join("")}</div>` : '<p class="c-none">Контактов в OpenStreetMap нет — поищите компанию в 2ГИС или Яндекс Картах.</p>'}
+        ${rows.length ? `<div class="c-items">${rows.join("")}</div>` : '<p class="c-none">Контактов в OpenStreetMap нет - поищите компанию в 2ГИС или Яндекс Картах.</p>'}
         <div class="quick">${quick}</div>
       </div>
       <div class="panel">
@@ -275,7 +275,7 @@ function renderOverview() {
     ${map ? `<div class="panel"><h4>На карте</h4>${map}</div>` : ""}
     <div class="panel">
       <h4>Заметка</h4>
-      <textarea id="note" placeholder="Например: звонил 12.11, перезвонить после обеда, ЛПР — Ирина">${esc(c.note)}</textarea>
+      <textarea id="note" placeholder="Например: звонил 12.11, перезвонить после обеда, ЛПР - Ирина">${esc(c.note)}</textarea>
     </div>`;
 }
 
@@ -284,7 +284,7 @@ function renderMessages() {
   const me = loadSettings();
   const d = digits(c.phone);
   const tg = c.socials.telegram;
-  const head = !me.name ? `<p class="hint">${icon("info", 14)}<span>Укажите своё имя и телефон — они подставятся в тексты. <a data-action="settings">Заполнить</a></span></p>` : "";
+  const head = !me.name ? `<p class="hint">${icon("info", 14)}<span>Укажите своё имя и телефон - они подставятся в тексты. <a data-action="settings">Заполнить</a></span></p>` : "";
   return head + c.messages.map((msg, i) => {
     const text = fillPlaceholders(msg.text);
     const actions = [`<button class="btn btn-ghost btn-sm" data-copy-msg="${i}">${icon("copy", 14)}Копировать</button>`];
@@ -302,7 +302,7 @@ function renderMessages() {
       ${msg.subject ? `<div class="msg-subject">Тема: <b>${esc(msg.subject)}</b></div>` : ""}
       <div class="msg-text">${highlight(text)}</div>
     </div>`;
-  }).join("") + `<p class="hint">${icon("info", 14)}Совет: приложите к сообщению скриншот макета со вкладки «Макет сайта» — это сильно повышает отклик.</p>`;
+  }).join("") + `<p class="hint">${icon("info", 14)}Совет: приложите к сообщению скриншот макета со вкладки «Макет сайта» - это сильно повышает отклик.</p>`;
 }
 
 function renderMockup() {
@@ -327,13 +327,13 @@ function renderMockup() {
       <button class="btn btn-ghost btn-sm" data-copy="${esc(location.origin + src)}">${icon("link", 14)}Ссылка для клиента</button>
       <a class="btn btn-ghost btn-sm" href="${src}&download=1">${icon("download", 14)}Скачать HTML</a>
     </div>
-    <p class="hint">${icon("info", 14)}Откройте макет в новой вкладке и сделайте скриншот — его удобно отправить клиенту вместе с сообщением.</p>`;
+    <p class="hint">${icon("info", 14)}Откройте макет в новой вкладке и сделайте скриншот - его удобно отправить клиенту вместе с сообщением.</p>`;
 }
 
 function humanHours(v) {
   if (v.trim() === "24/7") return "Круглосуточно";
   const days = { Mo: "Пн", Tu: "Вт", We: "Ср", Th: "Чт", Fr: "Пт", Sa: "Сб", Su: "Вс", PH: "праздники", off: "выходной", closed: "выходной" };
-  return v.replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH|off|closed)\b/g, m => days[m]).replace(/-/g, "–").replace(/;\s*/g, " · ");
+  return v.replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH|off|closed)\b/g, m => days[m]).replace(/;\s*/g, " · ");
 }
 
 function slug(name) {
@@ -386,7 +386,7 @@ async function startScan(e) {
   }
 }
 // Сначала браузер сам спрашивает OpenStreetMap (все зеркала параллельно, берём первый ответ),
-// если не вышло — просим сервер.
+// если не вышло - просим сервер.
 async function searchCompanies(niches) {
   const body = JSON.stringify({ niches });
   const { query, servers } = await api("/api/scan/query", { method: "POST", body });

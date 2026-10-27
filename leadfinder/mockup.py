@@ -18,7 +18,7 @@ def _pal(bg, surface, ink, muted, accent, accent_ink, soft, line):
                 accent_ink=accent_ink, soft=soft, line=line)
 
 
-# У каждой ниши — свой дизайн (шаблон и шрифты) и три палитры на выбор
+# У каждой ниши - свой дизайн (шаблон и шрифты) и три палитры на выбор
 PALETTES = {
     "beauty": [
         _pal("#F6F1F3", "#FFFFFF", "#2B1D2A", "#6E5D6B", "#8E3A62", "#FFFFFF", "#EEDFE6", "#E2D3DA"),
@@ -71,7 +71,7 @@ DAYS = {"Mo": "Пн", "Tu": "Вт", "We": "Ср", "Th": "Чт", "Fr": "Пт", "S
 
 def humanize_hours(value: str | None) -> list[str]:
     if not value:
-        return ["Пн–Вс: 09:00–20:00"]
+        return ["Пн-Вс: 09:00-20:00"]
     if value.strip() == "24/7":
         return ["Круглосуточно"]
     out = []
@@ -80,8 +80,8 @@ def humanize_hours(value: str | None) -> list[str]:
         if not part:
             continue
         part = re.sub(r"\b(Mo|Tu|We|Th|Fr|Sa|Su|PH|off|closed)\b", lambda m: DAYS[m.group(1)], part)
-        part = part.replace("-", "–").replace(",", ", ")
-        part = re.sub(r"^([А-Яа-я–, ]+?)\s+(\d)", r"\1: \2", part)
+        part = part.replace(",", ", ")
+        part = re.sub(r"^([А-Яа-я, -]+?)\s+(\d)", r"\1: \2", part)
         out.append(part)
     return out
 

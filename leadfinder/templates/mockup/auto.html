@@ -99,7 +99,7 @@
 
 <section id="prices"><div class="wrap">
   <h2>Цены на работы</h2>
-  <p class="sub">Цена для легкового автомобиля. Точную сумму назовём после осмотра — и только потом начнём.</p>
+  <p class="sub">Цена для легкового автомобиля. Точную сумму назовём после осмотра - и только потом начнём.</p>
   <div class="list">
     {% for name, price in x.calc %}
     <div class="list-row"><b>{{ name }}</b><span class="g">Гарантия 6 месяцев</span><span class="p">{% if price %}от {{ "{:,}".format(price).replace(",", " ") }} ₽{% else %}0 ₽{% endif %}</span></div>
@@ -115,7 +115,7 @@
 
 <section><div class="wrap warranty">
   <div class="big">6 мес.</div>
-  <p>Гарантия на работы и установленные запчасти. Если что-то пошло не так — исправим бесплатно, без споров и экспертиз.</p>
+  <p>Гарантия на работы и установленные запчасти. Если что-то пошло не так - исправим бесплатно, без споров и экспертиз.</p>
 </div></section>
 
 {% if photos|length > 2 %}
@@ -133,7 +133,7 @@
   function update() {
     const picked = [...calc.querySelectorAll(".works input:checked")];
     const total = Math.round(picked.reduce((s, i) => s + +i.value, 0) * k / 50) * 50;
-    out.textContent = picked.length ? fmt(total) : "—";
+    out.textContent = picked.length ? fmt(total) : "-";
     if (btn.href.includes("wa.me")) {
       const u = new URL(btn.href);
       u.searchParams.set("text", "Здравствуйте! Хочу записаться: " + picked.map(i => i.dataset.name).join(", "));

@@ -2,7 +2,7 @@
  {"type": "node", "id": 101, "lat": 45.03, "lon": 38.97, "tags": {"shop": "hairdresser", "name": "Локон", "addr:street": "улица Красная", "addr:housenumber": "10", "phone": "+7 861 200-00-01"}},
  {"type": "node", "id": 102, "lat": 45.04, "lon": 38.98, "tags": {"amenity": "cafe", "name": "Зерно", "website": "https://instagram.com/zerno", "contact:telegram": "@zerno"}},
  {"type": "way", "id": 103, "center": {"lat": 45.05, "lon": 38.99}, "tags": {"shop": "car_repair", "name": "Гараж", "website": "garage23.ru", "opening_hours": "Mo-Fr 09:00-19:00"}},
- {"type": "node", "id": 104, "lat": 45.0, "lon": 38.9, "tags": {"amenity": "fast_food", "name": "Вкусно — и точка", "brand": "Вкусно — и точка", "brand:wikidata": "Q1"}},
+ {"type": "node", "id": 104, "lat": 45.0, "lon": 38.9, "tags": {"amenity": "fast_food", "name": "Вкусно - и точка", "brand": "Вкусно - и точка", "brand:wikidata": "Q1"}},
  {"type": "node", "id": 105, "lat": 45.0, "lon": 38.9, "tags": {"amenity": "bench"}},
  {"type": "node", "id": 106, "lat": 45.0, "lon": 38.9, "tags": {"shop": "florist"}}
 ]}

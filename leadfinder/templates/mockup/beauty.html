@@ -92,7 +92,7 @@
           <button type="button" aria-pressed="false" data-day="2">Послезавтра</button>
         </div>
         <div class="slots" role="group" aria-label="Время"></div>
-        <select aria-label="Услуга">{% for s in x.services %}<option>{{ s[0] }} — {{ s[3] }}</option>{% endfor %}</select>
+        <select aria-label="Услуга">{% for s in x.services %}<option>{{ s[0] }} - {{ s[3] }}</option>{% endfor %}</select>
         <button class="btn" type="button" id="book-btn" disabled>Выберите время</button>
       </div>
       <div class="done" role="status"><strong>Вы записаны</strong><p id="done-text"></p></div>
@@ -102,7 +102,7 @@
 
 <section id="services"><div class="wrap">
   <h2>Услуги и цены</h2>
-  <p class="sub">Итоговую стоимость мастер назовёт до начала работы — без доплат в конце.</p>
+  <p class="sub">Итоговую стоимость мастер назовёт до начала работы - без доплат в конце.</p>
   <div class="price">
     {% for name, desc, time, cost in x.services %}
     <div class="price-row"><h3>{{ name }}</h3><span class="time">{{ time }}</span><span class="cost">{{ cost }}</span><p>{{ desc }}</p></div>
@@ -112,7 +112,7 @@
 
 <section class="visit"><div class="wrap">
   <h2>Как проходит визит</h2>
-  <p class="sub">Три шага — и никаких переписок в директе.</p>
+  <p class="sub">Три шага - и никаких переписок в директе.</p>
   <div class="steps">{% for t, d in x.steps %}<div class="step"><h3>{{ t }}</h3><p>{{ d }}</p></div>{% endfor %}</div>
 </div></section>
 
@@ -150,7 +150,7 @@
   });
   btn.addEventListener("click", () => {
     document.getElementById("done-text").textContent =
-      `${select.value.split(" — ")[0]}, ${dayNames[day]} в ${time}. Мы пришлём напоминание накануне.`;
+      `${select.value.split(" - ")[0]}, ${dayNames[day]} в ${time}. Мы пришлём напоминание накануне.`;
     book.classList.add("is-done");
   });
   render();

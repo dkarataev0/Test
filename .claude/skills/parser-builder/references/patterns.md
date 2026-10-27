@@ -54,7 +54,7 @@ class Client:
         self.http.close()
 ```
 
-Для большого объёма — `httpx.AsyncClient` + `asyncio.Semaphore(3)` вместо последовательных запросов.
+Для большого объёма - `httpx.AsyncClient` + `asyncio.Semaphore(3)` вместо последовательных запросов.
 
 ## Модель и разбор
 

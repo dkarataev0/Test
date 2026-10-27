@@ -82,7 +82,7 @@
 <section class="board" id="menu"><div class="wrap">
   <div>
     <h2>Меню</h2>
-    <p class="sub">Готовим из свежих продуктов каждый день. Цены — как в зале и на доставке.</p>
+    <p class="sub">Готовим из свежих продуктов каждый день. Цены - как в зале и на доставке.</p>
     <div class="tabs" role="tablist">
       {% for title in x.menu %}<button role="tab" aria-selected="{{ 'true' if loop.first else 'false' }}" data-tab="{{ loop.index0 }}">{{ title }}</button>{% endfor %}
     </div>
@@ -98,15 +98,15 @@
 <section><div class="wrap">
   <div class="facts">
     <div><h3>45 минут</h3><p>Среднее время доставки по району. Привозим в термосумках.</p></div>
-    <div><h3>От 1 000 ₽</h3><p>Доставка бесплатно. Меньше — 150 ₽ по городу.</p></div>
-    <div><h3>Картой или СБП</h3><p>Оплата при получении или онлайн — как удобнее.</p></div>
+    <div><h3>От 1 000 ₽</h3><p>Доставка бесплатно. Меньше - 150 ₽ по городу.</p></div>
+    <div><h3>Картой или СБП</h3><p>Оплата при получении или онлайн - как удобнее.</p></div>
   </div>
 </div></section>
 
 <section class="reserve" id="reserve"><div class="wrap">
   <div>
     <h2>Забронировать стол</h2>
-    <p class="sub">Оставьте телефон — администратор подтвердит бронь в течение 10 минут.</p>
+    <p class="sub">Оставьте телефон - администратор подтвердит бронь в течение 10 минут.</p>
   </div>
   <form class="rform" onsubmit="event.preventDefault(); this.classList.add('sent')">
     <div class="fields">
@@ -115,7 +115,7 @@
         <label>Время<select><option>18:00</option><option>19:00</option><option selected>19:30</option><option>20:30</option></select></label>
       </div>
       <div class="row">
-        <label>Гостей<select><option>2</option><option>3</option><option selected>4</option><option>5–8</option><option>Больше 8</option></select></label>
+        <label>Гостей<select><option>2</option><option>3</option><option selected>4</option><option>5-8</option><option>Больше 8</option></select></label>
         <label>Телефон<input type="tel" placeholder="+7" required></label>
       </div>
       <button class="btn" type="submit">Забронировать</button>

@@ -1,6 +1,6 @@
 """Хранение найденных компаний (статусы и заметки не теряются при новом поиске).
 
-Локально — SQLite-файл. На хостинге — PostgreSQL (Supabase), если задан DATABASE_URL.
+Локально - SQLite-файл. На хостинге - PostgreSQL (Supabase), если задан DATABASE_URL.
 """
 import json
 import os
@@ -38,7 +38,7 @@ def _row(data, status, note) -> Company:
 
 
 class Storage:
-    """SQLite. Подстановка параметров — «?»."""
+    """SQLite. Подстановка параметров - «?»."""
 
     ph = "?"
 
@@ -97,7 +97,7 @@ class Storage:
 
 
 class PgStorage(Storage):
-    """PostgreSQL (Supabase). Тот же интерфейс, подстановка — «%s»."""
+    """PostgreSQL (Supabase). Тот же интерфейс, подстановка - «%s»."""
 
     ph = "%s"
 
@@ -113,7 +113,7 @@ class PgStorage(Storage):
 
     @contextmanager
     def _conn(self):
-        # prepare_threshold=None — совместимость с пулером Supabase (transaction mode)
+        # prepare_threshold=None - совместимость с пулером Supabase (transaction mode)
         with self._psycopg.connect(self.url, prepare_threshold=None, connect_timeout=10) as db:
             yield db
 

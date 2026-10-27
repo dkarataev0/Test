@@ -32,7 +32,7 @@ class Company(BaseModel):
 
     @property
     def priority(self) -> int:
-        """Чем больше — тем интереснее как клиент."""
+        """Чем больше - тем интереснее как клиент."""
         base = {"no_site": 100, "social_only": 90, "bad_site": 70, "unchecked": 40, "ok": 0}[self.kind]
         if self.kind == "bad_site" and self.audit:
             base += (100 - self.audit.score) // 5

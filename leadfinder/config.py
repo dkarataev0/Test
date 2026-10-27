@@ -16,7 +16,7 @@ OVERPASS_URLS = os.getenv("LEADFINDER_OVERPASS", ",".join([
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
 ])).split(",")
-# Общий бюджет времени на поиск (лимит функции Vercel — 300 с)
+# Общий бюджет времени на поиск (лимит функции Vercel - 300 с)
 OVERPASS_BUDGET = 120
 
 # Порог: сайт с оценкой ниже считается «требует обновления»

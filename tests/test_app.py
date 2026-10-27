@@ -104,7 +104,7 @@ def test_password_protects_app(tmp_path):
     assert c.post("/api/login", json={"password": "wrong"}).status_code == 401
     assert c.post("/api/login", json={"password": "secret"}).status_code == 200
     assert c.get("/api/meta").json()["auth"] is True
-    # макет открывается без входа — ссылку можно отправить клиенту
+    # макет открывается без входа - ссылку можно отправить клиенту
     c.post("/api/demo")
     anon = TestClient(c.app)
     assert anon.get("/mockup/demo1").status_code == 200
