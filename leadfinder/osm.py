@@ -4,7 +4,7 @@ import logging
 
 import httpx
 
-from .config import CITY, NICHES, OVERPASS_BUDGET, OVERPASS_URLS, SOCIAL_DOMAINS
+from .config import CITY, CITY_BBOX, NICHES, OVERPASS_BUDGET, OVERPASS_URLS, SOCIAL_DOMAINS
 
 USER_AGENT = "LeadFinder/1.0 (+https://github.com/dkarataev0/Test)"
 from .models import Company
@@ -21,17 +21,13 @@ SOCIAL_KEYS = {
 }
 
 
-def build_query(niches: list[str], city: str = CITY) -> str:
+def build_query(niches: list[str], bbox: str = CITY_BBOX) -> str:
     parts = []
     for niche in niches:
         for (key, value) in NICHES[niche]["tags"]:
-            parts.append(f'  nwr["{key}"="{value}"]["name"](area.city);')
+            parts.append(f'  nwr["{key}"="{value}"]["name"];')
     body = "\n".join(parts)
-    return (
-        "[out:json][timeout:110];\n"
-        f'area["name"="{city}"]["boundary"="administrative"]->.city;\n'
-        f"(\n{body}\n);\nout center tags;"
-    )
+    return f"[out:json][timeout:90][bbox:{bbox}];\n(\n{body}\n);\nout center tags;"
 
 
 def _clean_url(url: str) -> str:
@@ -120,7 +116,7 @@ def parse_elements(elements: list[dict]) -> list[Company]:
 
 async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -> list[Company]:
     """Опрашивает все зеркала Overpass параллельно и берёт первый успешный ответ."""
-    query = build_query(niches, city)
+    query = build_query(niches)
     timeout = httpx.Timeout(OVERPASS_BUDGET, connect=15)
     errors: list[str] = []
     if on_status:
@@ -131,8 +127,9 @@ async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -
             r = await client.post(url, data={"data": query})
             r.raise_for_status()
             data = r.json()
-            if "elements" not in data:
-                raise ValueError(data.get("remark") or "пустой ответ")
+            remark = data.get("remark") or ""
+            if "elements" not in data or (not data["elements"] and "error" in remark.lower()):
+                raise ValueError(remark or "пустой ответ")
             return data["elements"]
 
         tasks = {asyncio.create_task(ask(u)): u for u in OVERPASS_URLS}

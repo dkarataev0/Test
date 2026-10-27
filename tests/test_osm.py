@@ -28,8 +28,8 @@ def test_kinds_and_fields():
     assert by["Гараж"].lat == 45.05  # центр way
 
 
-def test_query_contains_city_and_tags():
-    q = build_query(["beauty", "auto"], "Краснодар")
-    assert 'area["name"="Краснодар"]' in q
+def test_query_contains_bbox_and_tags():
+    q = build_query(["beauty", "auto"], "44.9,38.8,45.2,39.2")
+    assert "[bbox:44.9,38.8,45.2,39.2]" in q
     assert '["shop"="hairdresser"]' in q and '["shop"="car_repair"]' in q
     assert '"cafe"' not in q

@@ -8,6 +8,8 @@ DATA_DIR = Path(os.getenv("LEADFINDER_DATA", _default_data))
 DB_PATH = DATA_DIR / "leads.db"
 
 CITY = os.getenv("LEADFINDER_CITY", "Краснодар")
+# Границы поиска: юг,запад,север,восток. Поиск по прямоугольнику в разы быстрее поиска по названию города.
+CITY_BBOX = os.getenv("LEADFINDER_BBOX", "44.97,38.82,45.19,39.22")
 
 OVERPASS_URLS = os.getenv("LEADFINDER_OVERPASS", ",".join([
     "https://overpass-api.de/api/interpreter",
@@ -15,7 +17,7 @@ OVERPASS_URLS = os.getenv("LEADFINDER_OVERPASS", ",".join([
     "https://overpass.private.coffee/api/interpreter",
 ])).split(",")
 # Общий бюджет времени на поиск (лимит функции Vercel — 300 с)
-OVERPASS_BUDGET = 240
+OVERPASS_BUDGET = 120
 
 # Порог: сайт с оценкой ниже считается «требует обновления»
 BAD_SITE_SCORE = 60
