@@ -1,10 +1,12 @@
 """Поиск компаний в OpenStreetMap через Overpass API."""
+import asyncio
 import logging
-import time
 
 import httpx
 
 from .config import CITY, NICHES, OVERPASS_BUDGET, OVERPASS_URLS, SOCIAL_DOMAINS
+
+USER_AGENT = "LeadFinder/1.0 (+https://github.com/dkarataev0/Test)"
 from .models import Company
 
 log = logging.getLogger(__name__)
@@ -117,27 +119,36 @@ def parse_elements(elements: list[dict]) -> list[Company]:
 
 
 async def fetch_companies(niches: list[str], city: str = CITY, on_status=None) -> list[Company]:
+    """Опрашивает все зеркала Overpass параллельно и берёт первый успешный ответ."""
     query = build_query(niches, city)
-    last_error: Exception | None = None
-    deadline = time.monotonic() + OVERPASS_BUDGET
-    async with httpx.AsyncClient(timeout=httpx.Timeout(120, connect=15),
-                                 headers={"User-Agent": "LeadFinder/1.0"}) as client:
-        for i, url in enumerate(OVERPASS_URLS, 1):
-            if on_status:
-                on_status(f"Запрос к OpenStreetMap (сервер {i} из {len(OVERPASS_URLS)})…")
-            left = deadline - time.monotonic()
-            if left < 10:
-                break
-            try:
-                log.info("Overpass: %s", url)
-                r = await client.post(url, data={"data": query},
-                                      timeout=httpx.Timeout(min(120, left), connect=15))
-                r.raise_for_status()
-                return parse_elements(r.json().get("elements", []))
-            except (httpx.HTTPError, ValueError) as exc:
-                log.warning("Overpass %s недоступен: %s", url, exc)
-                last_error = exc
+    timeout = httpx.Timeout(OVERPASS_BUDGET, connect=15)
+    errors: list[str] = []
+    if on_status:
+        on_status("Запрос к OpenStreetMap…")
+
+    async with httpx.AsyncClient(timeout=timeout, headers={"User-Agent": USER_AGENT}) as client:
+        async def ask(url: str) -> list[dict]:
+            r = await client.post(url, data={"data": query})
+            r.raise_for_status()
+            data = r.json()
+            if "elements" not in data:
+                raise ValueError(data.get("remark") or "пустой ответ")
+            return data["elements"]
+
+        tasks = {asyncio.create_task(ask(u)): u for u in OVERPASS_URLS}
+        try:
+            for fut in asyncio.as_completed(tasks):
+                try:
+                    return parse_elements(await fut)
+                except (httpx.HTTPError, ValueError) as exc:
+                    reason = (f"HTTP {exc.response.status_code}" if isinstance(exc, httpx.HTTPStatusError)
+                              else type(exc).__name__ if not str(exc) else str(exc)[:120])
+                    errors.append(reason)
+                    log.warning("Overpass недоступен: %s", reason)
+        finally:
+            for t in tasks:
+                t.cancel()
     raise RuntimeError(
-        "Не удалось получить данные из OpenStreetMap — все серверы Overpass недоступны. "
-        "Проверьте интернет и попробуйте позже."
-    ) from last_error
+        "Не удалось получить данные из OpenStreetMap — серверы Overpass не ответили "
+        f"({'; '.join(errors)}). Попробуйте ещё раз через пару минут."
+    )
