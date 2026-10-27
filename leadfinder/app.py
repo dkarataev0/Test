@@ -20,7 +20,7 @@ from .config import CITY, DB_PATH, NICHES, ROOT
 from .messages import build_messages
 from .mockup import THEMES, render_mockup
 from .models import Company
-from .storage import Storage, get_storage
+from .storage import Storage, StorageUnavailable, get_storage
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class LoginRequest(BaseModel):
 
 
 AUDIT_BATCH = 12  # сайтов за один запрос — укладываемся в лимит времени serverless-функции
-PUBLIC_PATHS = ("/login", "/api/login", "/mockup/", "/static/login")
+PUBLIC_PATHS = ("/login", "/api/login", "/api/health", "/mockup/", "/static/login")
 
 
 def create_app(storage: Storage | None = None, password: str | None = None) -> FastAPI:
@@ -64,6 +64,19 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         if path.startswith("/api/"):
             return JSONResponse({"detail": "Нужно войти"}, status_code=401)
         return RedirectResponse("/login")
+
+    @app.exception_handler(StorageUnavailable)
+    async def storage_error(request: Request, exc: StorageUnavailable):
+        log.error("База данных недоступна: %s", exc)
+        return JSONResponse({"detail": f"База данных недоступна: {exc}"}, status_code=503)
+
+    @app.get("/api/health")
+    def health():
+        try:
+            store.get_meta("last_scan")
+            return {"ok": True}
+        except StorageUnavailable as exc:
+            return JSONResponse({"ok": False, "error": str(exc)}, status_code=503)
 
     @app.get("/login", response_class=HTMLResponse)
     def login_page():

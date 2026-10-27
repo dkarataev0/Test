@@ -130,6 +130,35 @@ class PgStorage(Storage):
                 "ON CONFLICT(id) DO UPDATE SET data = excluded.data", rows)
 
 
-def get_storage(sqlite_path: Path) -> Storage:
+class StorageUnavailable(RuntimeError):
+    pass
+
+
+class LazyStorage:
+    """Подключается к базе при первом обращении, а не при старте приложения:
+    если база недоступна, приложение всё равно запускается и показывает понятную ошибку."""
+
+    def __init__(self, factory):
+        self._factory = factory
+        self._store: Storage | None = None
+
+    def __getattr__(self, name):
+        if self._store is None:
+            try:
+                self._store = self._factory()
+            except Exception as exc:
+                raise StorageUnavailable(_redact(str(exc))) from exc
+        return getattr(self._store, name)
+
+
+def _redact(text: str) -> str:
+    url = os.getenv("DATABASE_URL", "")
+    if "@" in url and ":" in url.split("@")[0]:
+        secret = url.split("@")[0].rsplit(":", 1)[1]
+        text = text.replace(secret, "***")
+    return text
+
+
+def get_storage(sqlite_path: Path):
     url = os.getenv("DATABASE_URL")
-    return PgStorage(url) if url else Storage(sqlite_path)
+    return LazyStorage(lambda: PgStorage(url) if url else Storage(sqlite_path))
