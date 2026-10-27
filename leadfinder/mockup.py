@@ -35,6 +35,11 @@ PALETTES = {
         _pal("#F4F8F7", "#FFFFFF", "#12302B", "#55706A", "#0F7A6C", "#FFFFFF", "#FFD27A", "#DCE8E5"),
         _pal("#121722", "#1B2130", "#F1F3F8", "#A5ADC0", "#FFB547", "#121722", "#262E40", "#2E3649"),
     ],
+    "other": [
+        _pal("#F7F8F6", "#FFFFFF", "#16201C", "#5D6763", "#0E6E73", "#FFFFFF", "#F6C344", "#E3E6E3"),
+        _pal("#F6F7FF", "#FFFFFF", "#1A1B3A", "#5B5E80", "#4F46E5", "#FFFFFF", "#FFD166", "#E2E4F6"),
+        _pal("#15181D", "#1F232A", "#F1F2F4", "#A3A8B1", "#8FB8FF", "#15181D", "#2A2F37", "#30353D"),
+    ],
     "education": [
         None,
         _pal("#F6F7FF", "#FFFFFF", "#1A1B3A", "#5B5E80", "#4F46E5", "#FFFFFF", "#FFD166", "#E2E4F6"),
@@ -48,11 +53,12 @@ FONTS = {
     "sauna": "family=Forum&family=Manrope:wght@400;500;600;700",
     "leisure": "family=Unbounded:wght@500;600&family=Manrope:wght@400;500;600;700;800",
     "education": "family=Unbounded:wght@500;600&family=Manrope:wght@400;500;600;700;800",
+    "other": "family=Unbounded:wght@500;600&family=Manrope:wght@400;500;600;700;800",
 }
-DISPLAY_FONT = {"beauty": "Prata", "sauna": "Forum", "leisure": "Unbounded", "education": "Unbounded"}
+DISPLAY_FONT = {"beauty": "Prata", "sauna": "Forum", "leisure": "Unbounded", "education": "Unbounded", "other": "Unbounded"}
 # Шаблон страницы: с онлайн-записью по времени или с формой обратного звонка
-TEMPLATE = {"beauty": "beauty", "sauna": "beauty", "leisure": "services", "education": "services"}
-CTA_ANCHOR = {"beauty": "book", "sauna": "book", "leisure": "callback", "education": "callback"}
+TEMPLATE = {"beauty": "beauty", "sauna": "beauty", "leisure": "services", "education": "services", "other": "services"}
+CTA_ANCHOR = {"beauty": "book", "sauna": "book", "leisure": "callback", "education": "callback", "other": "callback"}
 
 
 def palette(c: Company, variant: int) -> dict:

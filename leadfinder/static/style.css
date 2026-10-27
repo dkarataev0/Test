@@ -364,3 +364,8 @@ legend { margin-bottom: 10px; color: var(--muted); font-size: 13px; font-weight:
 .toggle-chip { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); user-select: none; transition: all .2s var(--spring); }
 .toggle-chip input { accent-color: var(--violet); width: 16px; height: 16px; }
 .toggle-chip:has(input:checked) { color: var(--violet); border-color: var(--iris); background: var(--lavender); }
+
+.followup-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: #FEF3DC; color: #92400E; font-size: 12px; font-weight: 700; animation: nudge 2.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 85%, 100% { transform: none; } 90% { transform: rotate(-4deg); } 95% { transform: rotate(4deg); } }
+.panel h4 .since { margin-left: 8px; color: var(--dim); font-weight: 500; font-size: 12.5px; }
+.followup-tip { margin: -2px 0 12px; background: #FEF3DC; color: #92400E; }

@@ -1,5 +1,7 @@
 """Быстрая оценка качества сайта: доступность, мобильность, HTTPS, свежесть."""
 import asyncio
+import ipaddress
+import socket
 import datetime as dt
 import re
 import time
@@ -75,6 +77,23 @@ def analyze_html(html: str, final_url: str, load_time: float, size: int,
                  load_time=round(load_time, 2), issues=issues, checks=checks)
 
 
+class BlockedHost(httpx.HTTPError):
+    """Адрес из внутренней сети: такие сайты не проверяем."""
+
+
+async def _only_public(request: httpx.Request) -> None:
+    """Не даём проверке сайтов ходить во внутреннюю сеть (в том числе через редиректы)."""
+    host = request.url.host
+    try:
+        infos = await asyncio.to_thread(socket.getaddrinfo, host, None)
+    except OSError:
+        return  # не резолвится - запрос сам упадёт с понятной ошибкой
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if not ip.is_global:
+            raise BlockedHost(f"внутренний адрес {host}")
+
+
 async def _get(client: httpx.AsyncClient, url: str) -> httpx.Response | None:
     try:
         return await client.get(url)
@@ -114,7 +133,8 @@ async def audit_companies(companies: list[Company], on_progress=None, concurrenc
     targets = [c for c in companies if c.website]
     sem = asyncio.Semaphore(concurrency)
     done = 0
-    opts = dict(headers=HEADERS, follow_redirects=True, timeout=httpx.Timeout(15, connect=8))
+    opts = dict(headers=HEADERS, follow_redirects=True, timeout=httpx.Timeout(15, connect=8),
+                event_hooks={"request": [_only_public]})
     async with httpx.AsyncClient(**opts) as client, \
             httpx.AsyncClient(verify=False, **opts) as insecure:
         async def one(c: Company):

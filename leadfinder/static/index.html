@@ -137,10 +137,11 @@
 <dialog id="settings-dialog" class="dialog">
   <form method="dialog" id="settings-form">
     <h2>Мои данные</h2>
-    <p class="muted">Подставляются в шаблоны сообщений вместо [Ваше имя], [Ваш телефон], [Портфолио]. Хранятся только в этом браузере.</p>
+    <p class="muted">Подставляются в шаблоны сообщений вместо [Ваше имя], [Ваш телефон], [Портфолио] и [Цена]. Хранятся только в этом браузере.</p>
     <label class="field"><span>Ваше имя</span><input name="name" autocomplete="name" placeholder="Например, Дмитрий"></label>
     <label class="field"><span>Телефон</span><input name="phone" autocomplete="tel" placeholder="+7 900 000-00-00"></label>
     <label class="field"><span>Ссылка на портфолио</span><input name="portfolio" placeholder="https://..."></label>
+    <label class="field"><span>Цена сайта от, ₽</span><input name="price" inputmode="numeric" placeholder="Например, 25 000"></label>
     <div class="danger-zone">
       <div><b>Очистить список</b><span>Удалить всех со статусом «Новый». Те, кому вы написали, останутся.</span></div>
       <button type="button" class="btn btn-ghost btn-sm danger" id="btn-clear-new">Очистить</button>

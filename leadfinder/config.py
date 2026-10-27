@@ -94,5 +94,5 @@ FREE_BUILDERS = (
 
 
 def niche_of(niche: str) -> str:
-    """Ниша для текстов и макетов. Записи из удалённых ниш показываем как «отдых и досуг»."""
-    return niche if niche in NICHES else "leisure"
+    """Ниша для текстов и макетов. Записи из удалённых ниш получают общие тексты и макет."""
+    return niche if niche in NICHES else "other"

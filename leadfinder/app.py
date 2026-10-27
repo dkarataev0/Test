@@ -8,12 +8,12 @@ import hmac
 import json
 import logging
 import os
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import (FileResponse, HTMLResponse, JSONResponse, RedirectResponse,
-                               StreamingResponse)
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import audit, osm
 from .config import CITY, DB_PATH, NICHES, REGIONS, ROOT
@@ -35,13 +35,13 @@ KINDS = {"no_site": "Нет сайта", "social_only": "Только соцсе
 class ScanRequest(BaseModel):
     niches: list[str] = list(NICHES)
     region: str = "city"
-    limit: int | None = None  # сколько НОВЫХ компаний добавить; None - все
+    limit: int | None = Field(None, ge=1, le=10000)  # сколько НОВЫХ компаний добавить; None - все
 
 
 class ImportRequest(BaseModel):
     elements: list[dict]
     region: str = "city"
-    limit: int | None = None
+    limit: int | None = Field(None, ge=1, le=10000)
 
 
 class UpdateRequest(BaseModel):
@@ -53,8 +53,22 @@ class LoginRequest(BaseModel):
     password: str
 
 
+FOLLOWUP_DAYS = 3  # через сколько дней без ответа пора напомнить о себе
 AUDIT_BATCH = 12  # сайтов за один запрос - укладываемся в лимит времени serverless-функции
 PUBLIC_PATHS = ("/login", "/api/login", "/api/health", "/mockup/", "/static/login")
+
+
+LOCAL_TZ = ZoneInfo(os.getenv("LEADFINDER_TZ", "Europe/Moscow"))  # Краснодар живёт по московскому времени
+
+
+def now() -> dt.datetime:
+    return dt.datetime.now(LOCAL_TZ).replace(tzinfo=None)
+
+
+def safe_cell(value) -> str:
+    """Защита от CSV-инъекций: Excel выполняет ячейки, начинающиеся с = + - @, как формулы."""
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
 def telegram_rank(c: Company) -> int:
@@ -116,8 +130,20 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         resp.delete_cookie(COOKIE)
         return resp
 
-    def card(c: Company) -> dict:
+    # Когда меняли статус: хранится в meta, чтобы не терялось при повторном поиске
+    def status_log() -> dict:
+        return json.loads(store.get_meta("status_log") or "{}")
+
+    def followup_due(c: Company, log_: dict) -> bool:
+        at = log_.get(c.id)
+        if c.status != "contacted" or not at:
+            return False
+        return (now() - dt.datetime.fromisoformat(at)).days >= FOLLOWUP_DAYS
+
+    def card(c: Company, log_: dict | None = None) -> dict:
+        log_ = status_log() if log_ is None else log_
         return {**c.model_dump(exclude={"audit"}), "priority": c.priority, "telegram": telegram_rank(c),
+                "status_at": log_.get(c.id), "followup": followup_due(c, log_),
                 "score": c.audit.score if c.audit else None,
                 "issues_count": len(c.audit.issues) if c.audit else 0}
 
@@ -148,7 +174,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
                 c.audit, c.kind = old.audit, old.kind
         store.clear_demo()
         store.upsert(companies)
-        store.set_meta("last_scan", dt.datetime.now().isoformat(timespec="minutes"))
+        store.set_meta("last_scan", now().isoformat(timespec="minutes"))
         return {"found": len(companies), "already": already,
                 "to_audit": sum(1 for c in companies if c.website and c.kind == "unchecked")}
 
@@ -163,7 +189,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
                 "queries": [{"niche": n, "label": NICHES[n]["label"], "query": osm.build_query([n], req.region)}
                             for n in req.niches],
                 "servers": osm.OVERPASS_URLS,
-                "timeout": 180 if req.region == "krai" else 120,
+                "timeout": 150 if req.region == "krai" else 60,
                 # на Vercel серверы OpenStreetMap недоступны, запасной путь через сервер там бесполезен
                 "server_fallback": os.getenv("VERCEL") != "1"}
 
@@ -171,7 +197,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
     def client_log(entry: dict):
         """Ошибки поиска из браузера: сохраняем последние 30, чтобы можно было разобраться."""
         log_items = json.loads(store.get_meta("client_log") or "[]")
-        log_items.append({"at": dt.datetime.now().isoformat(timespec="seconds"), **entry})
+        log_items.append({"at": now().isoformat(timespec="seconds"), **entry})
         store.set_meta("client_log", json.dumps(log_items[-30:], ensure_ascii=False))
         return {"ok": True}
 
@@ -206,6 +232,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
     @app.get("/api/meta")
     def meta():
         items = store.all()
+        log_ = status_log()
         counts = {k: sum(c.kind == k for c in items) for k in KINDS}
         return {
             "city": CITY,
@@ -216,6 +243,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             "total": len(items), "counts": counts,
             "in_work": sum(c.status in ("contacted", "replied") for c in items),
             "deals": sum(c.status == "deal" for c in items),
+            "followup": sum(followup_due(c, log_) for c in items),
             "last_scan": store.get_meta("last_scan"),
             "demo": any(c.demo for c in items),
             "pending_audit": sum(1 for c in items if c.website and c.kind == "unchecked"),
@@ -238,7 +266,10 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             items = [c for c in items if c.kind in ("no_site", "social_only", "bad_site")]
         elif kind:
             items = [c for c in items if c.kind == kind]
-        if status:
+        log_ = status_log()
+        if status == "followup":
+            items = [c for c in items if followup_due(c, log_)]
+        elif status:
             items = [c for c in items if c.status == status]
         if contacts:
             items = [c for c in items if c.phone or c.socials or c.email]
@@ -251,7 +282,7 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             items.sort(key=lambda c: (-telegram_rank(c), -c.priority, c.name))
         else:
             items.sort(key=lambda c: (-c.priority, c.name))
-        return [card(c) for c in items]
+        return [card(c, log_) for c in items]
 
     @app.post("/api/companies/clear-new")
     def clear_new():
@@ -263,7 +294,9 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
         c = store.get(cid)
         if not c:
             raise HTTPException(404, "Компания не найдена")
-        return {**c.model_dump(), "priority": c.priority, "messages": build_messages(c, CITY)}
+        log_ = status_log()
+        return {**c.model_dump(), "priority": c.priority, "messages": build_messages(c, CITY),
+                "status_at": log_.get(c.id), "followup": followup_due(c, log_)}
 
     @app.patch("/api/companies/{cid}")
     def update(cid: str, req: UpdateRequest):
@@ -271,7 +304,12 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
             raise HTTPException(404, "Компания не найдена")
         if req.status and req.status not in STATUSES:
             raise HTTPException(400, "Неизвестный статус")
+        old = store.get(cid)
         store.update(cid, req.status, req.note)
+        if req.status and req.status != old.status:
+            log_ = status_log()
+            log_[cid] = now().isoformat(timespec="minutes")
+            store.set_meta("status_log", json.dumps(log_))
         return {"ok": True}
 
     @app.get("/mockup/{cid}", response_class=HTMLResponse)
@@ -290,13 +328,13 @@ def create_app(storage: Storage | None = None, password: str | None = None) -> F
     def export():
         buf = io.StringIO()
         w = csv.writer(buf, delimiter=";")
-        w.writerow(["Название", "Категория", "Адрес", "Телефон", "Email", "Сайт", "Соцсети",
+        w.writerow(["Название", "Категория", "Город", "Адрес", "Телефон", "Email", "Сайт", "Соцсети",
                     "Тип", "Оценка сайта", "Проблемы", "Статус", "Заметка"])
         for c in sorted(store.all(), key=lambda c: -c.priority):
-            w.writerow([c.name, c.category, c.address or "", c.phone or "", c.email or "",
-                        c.website or "", " ".join(c.socials.values()), KINDS[c.kind],
-                        c.audit.score if c.audit else "", "; ".join(c.audit.issues) if c.audit else "",
-                        STATUSES.get(c.status, c.status), c.note])
+            w.writerow([safe_cell(v) for v in (
+                c.name, c.category, c.city, c.address, c.phone, c.email, c.website,
+                " ".join(c.socials.values()), KINDS[c.kind], c.audit.score if c.audit else "",
+                "; ".join(c.audit.issues) if c.audit else "", STATUSES.get(c.status, c.status), c.note)])
         data = "﻿" + buf.getvalue()  # BOM, чтобы Excel понял кириллицу
         return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8",
                                  headers={"Content-Disposition": 'attachment; filename="leads.csv"'})

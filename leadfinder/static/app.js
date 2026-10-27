@@ -50,7 +50,10 @@ async function api(path, opts = {}) {
   if (r.status === 401 && !path.startsWith("/api/login")) { location.href = "/login"; throw new Error("Нужно войти"); }
   if (!r.ok) {
     let msg = `Ошибка ${r.status}`;
-    try { msg = (await r.json()).detail || msg; } catch {}
+    try {
+      const detail = (await r.json()).detail;
+      msg = Array.isArray(detail) ? detail.map(d => d.msg).join("; ") : (detail || msg);
+    } catch {}
     throw new Error(msg);
   }
   return r.json();
@@ -81,9 +84,10 @@ function fillPlaceholders(text) {
   return text
     .replaceAll("[Ваше имя]", me.name || "[Ваше имя]")
     .replaceAll("[Ваш телефон]", me.phone || "[Ваш телефон]")
-    .replaceAll("[Портфолио]", me.portfolio || "[Портфолио]");
+    .replaceAll("[Портфолио]", me.portfolio || "[Портфолио]")
+    .replaceAll("[Цена]", me.price ? `${me.price} ₽` : "[Цена]");
 }
-const highlight = text => esc(text).replace(/\[(Ваше имя|Ваш телефон|Портфолио)\]/g, '<span class="placeholder">[$1]</span>');
+const highlight = text => esc(text).replace(/\[(Ваше имя|Ваш телефон|Портфолио|Цена)\]/g, '<span class="placeholder">[$1]</span>');
 
 /* ---------- Состояние ---------- */
 const state = { meta: null, items: [], filters: { kind: "leads", niche: "", status: "", q: "" }, current: null, tab: "overview", variant: 0, device: "desktop" };
@@ -118,12 +122,13 @@ async function loadMeta() {
   countUp();
   $("#hero-title").textContent = leads ? `${leads} ${plural(leads, "потенциальный клиент", "потенциальных клиента", "потенциальных клиентов")}` : "Клиенты для ваших сайтов";
   $("#hero-text").textContent = leads
-    ? `${m.city}: ${m.counts.no_site} без сайта, ${m.counts.social_only} только в соцсетях, ${m.counts.bad_site} со слабым сайтом.${m.last_scan ? ` Последний поиск: ${m.last_scan.replace("T", " в ")}.` : ""}`
+    ? `${m.city}: ${m.counts.no_site} без сайта, ${m.counts.social_only} только в соцсетях, ${m.counts.bad_site} со слабым сайтом.${m.followup ? ` Пора напомнить о себе: ${m.followup}.` : ""}${m.last_scan ? ` Последний поиск: ${m.last_scan.replace("T", " в ")}.` : ""}`
     : `Ищу малый бизнес (${m.city}) без сайта или со слабым сайтом, проверяю их сайты и готовлю сообщение и макет для каждого.`;
 
   if ($("#niche-filter").options.length === 1) {
     for (const [k, v] of Object.entries(m.niches)) $("#niche-filter").add(new Option(v, k));
     for (const [k, v] of Object.entries(m.statuses)) $("#status-filter").add(new Option(v, k));
+    $("#status-filter").add(new Option("Пора напомнить", "followup"));
     $("#scan-niches").innerHTML = Object.entries(m.niches).map(([k, v]) =>
       `<label><input type="checkbox" name="niche" value="${k}" checked>${icon(k)}${esc(v)}</label>`).join("");
   }
@@ -131,8 +136,13 @@ async function loadMeta() {
 
 async function loadList() {
   const f = state.filters;
-  const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q, sort: f.sort || "", contacts: f.contacts === false ? "" : "1" });
-  state.items = await api("/api/companies?" + qs);
+  const qs = new URLSearchParams({ kind: f.kind, niche: f.niche, status: f.status, q: f.q, sort: f.sort || "", contacts: f.contacts === false ? "0" : "1" });
+  try {
+    state.items = await api("/api/companies?" + qs);
+  } catch (err) {
+    toast(`Не удалось загрузить список: ${err.message}`);
+    return;
+  }
   renderGrid();
 }
 
@@ -193,13 +203,18 @@ function renderGrid() {
       <span class="addr">${icon("pin", 14)}${esc([c.city && c.city !== state.meta.city ? c.city : "", c.address].filter(Boolean).join(", ") || c.city || "Адрес не указан")}</span>
       <div class="c-bottom">
         <span class="contacts-ic">${Object.entries(has).map(([k, on]) => `<span class="${on ? "on" : ""}" title="${{ phone: "Телефон", chat: "Мессенджер", mail: "Email", globe: "Сайт", link: "Соцсети" }[k]}">${icon(k, 14)}</span>`).join("")}</span>
-        <span class="status-dot st-${c.status}"><i></i>${esc(meta.statuses[c.status])}</span>
+        ${c.followup ? '<span class="followup-badge">Пора напомнить</span>' : `<span class="status-dot st-${c.status}"><i></i>${esc(meta.statuses[c.status])}</span>`}
       </div>
     </button>`;
   }).join("");
 }
 
 /* ---------- Карточка компании ---------- */
+function sinceText(iso) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
+  return days <= 0 ? "сегодня" : days === 1 ? "вчера" : `${days} ${plural(days, "день", "дня", "дней")} назад`;
+}
+
 // У каждой компании свой вариант макета по умолчанию, чтобы соседние сайты не были похожи
 const defaultVariant = id => [...id].reduce((s, ch) => s + ch.charCodeAt(0), 0) % 3;
 
@@ -295,7 +310,8 @@ function renderOverview() {
 
   return `
     <div class="panel">
-      <h4>Статус работы</h4>
+      <h4>Статус работы${c.status_at && c.status !== "new" ? `<small class="since">${esc(sinceText(c.status_at))}</small>` : ""}</h4>
+      ${c.followup ? `<p class="pitch followup-tip">Вы написали ${esc(sinceText(c.status_at))}, ответа пока нет. Отправьте напоминание со вкладки «Сообщения», это часто срабатывает.</p>` : ""}
       <div class="status-pills">${Object.entries(m.statuses).map(([k, v]) => `<button class="st-${k} ${c.status === k ? "active" : ""}" data-status="${k}"><i></i>${v}</button>`).join("")}</div>
     </div>
     <div class="row2">
@@ -521,6 +537,8 @@ async function searchCompanies(niches, region, limit) {
   const byId = new Map();
   const failed = [];
   for (const [n, q] of queries.entries()) {
+    // если ни одна ниша ещё не загрузилась и уже были неудачи - серверы лежат, не ждём дальше
+    if (failed.length && !byId.size) break;
     let res = null;
     for (let attempt = 1; attempt <= 3 && !res?.elements; attempt++) {
       setProgress(null, `Ищу «${q.label}» в OpenStreetMap (${n + 1} из ${queries.length})${attempt > 1 ? `, попытка ${attempt}` : ""}…`);
@@ -664,7 +682,8 @@ function bind() {
   $("#settings-cancel").addEventListener("click", () => $("#settings-dialog").close());
   $("#settings-form").addEventListener("submit", () => {
     const f = new FormData($("#settings-form"));
-    saveSettings({ name: f.get("name").trim(), phone: f.get("phone").trim(), portfolio: f.get("portfolio").trim() });
+    saveSettings({ name: f.get("name").trim(), phone: f.get("phone").trim(), portfolio: f.get("portfolio").trim(),
+      price: f.get("price").replace(/[^\d ]/g, "").trim() });
     toast("Данные сохранены");
     if (state.current && state.tab === "messages") renderTab();
   });
@@ -672,7 +691,7 @@ function bind() {
 function openSettings() {
   const me = loadSettings(), f = $("#settings-form");
   $("#btn-logout").hidden = !state.meta?.auth;
-  f.name.value = me.name || ""; f.phone.value = me.phone || ""; f.portfolio.value = me.portfolio || "";
+  f.name.value = me.name || ""; f.phone.value = me.phone || ""; f.portfolio.value = me.portfolio || ""; f.price.value = me.price || "";
   $("#settings-dialog").showModal();
 }
 

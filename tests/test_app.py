@@ -175,3 +175,45 @@ def test_contacts_only_filter(client):
     with_contacts = client.get("/api/companies", params={"contacts": "1"}).json()
     assert all(c["phone"] or c["socials"] or c["email"] for c in with_contacts)
     assert len(with_contacts) <= len(all_)
+
+
+def test_legacy_niche_gets_neutral_texts(client, tmp_path):
+    from leadfinder.models import Company
+    store = Storage(tmp_path / "legacy.db")
+    store.upsert([Company(id="n9", name="Флора", niche="services", category="Цветы", kind="no_site",
+                          phone="+79001112233")])
+    c = TestClient(create_app(store, password=""))
+    html = c.get("/mockup/n9").text
+    assert "Флора" in html and "бассейн" not in html.lower()
+    msgs = c.get("/api/companies/n9").json()["messages"]
+    assert "бронь" not in msgs[0]["text"]
+
+
+def test_export_escapes_formulas(client, tmp_path):
+    from leadfinder.models import Company
+    store = Storage(tmp_path / "csv.db")
+    store.upsert([Company(id="n8", name="=HYPERLINK(\"x\")", niche="sauna", category="Сауна", kind="no_site")])
+    text = TestClient(create_app(store, password="")).get("/api/export.csv").text
+    assert "'=HYPERLINK" in text
+
+
+def test_limit_must_be_positive(client):
+    assert client.post("/api/scan/import", json={"elements": [], "limit": -5}).status_code == 422
+
+
+def test_followup_after_three_days(tmp_path):
+    import datetime as dt
+    import json
+    from leadfinder.app import now
+    store = Storage(tmp_path / "f.db")
+    c = TestClient(create_app(store, password=""))
+    c.post("/api/demo")
+    c.patch("/api/companies/demo1", json={"status": "contacted"})
+    d = c.get("/api/companies/demo1").json()
+    assert d["status_at"] and d["followup"] is False
+    old = (now() - dt.timedelta(days=4)).isoformat(timespec="minutes")
+    store.set_meta("status_log", json.dumps({"demo1": old}))
+    assert [x["id"] for x in c.get("/api/companies", params={"status": "followup"}).json()] == ["demo1"]
+    assert c.get("/api/meta").json()["followup"] == 1
+    c.patch("/api/companies/demo1", json={"status": "replied"})
+    assert c.get("/api/meta").json()["followup"] == 0
