@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>@MasterMaler — малярные работы в Краснодаре</title>
+  <meta name="description" content="Покраска стен и потолков, шпаклёвка, грунтовка, декоративная штукатурка и покраска фасадов в Краснодаре и Краснодарском крае. Онлайн-калькулятор объёма и заявка за 2 минуты.">
+  <meta name="theme-color" content="#FAF5F2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#14110F" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="@MasterMaler — малярные работы в Краснодаре">
+  <meta property="og:description" content="Покраска, шпаклёвка и подготовка стен. Рассчитайте объём работ онлайн и оставьте заявку.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script>
+    try { var t = localStorage.getItem('mm-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HousePainter",
+    "name": "@MasterMaler",
+    "description": "Малярные работы: покраска стен, потолков и фасадов, шпаклёвка, грунтовка, декоративная штукатурка.",
+    "telephone": "+7-918-115-76-76",
+    "address": { "@type": "PostalAddress", "addressLocality": "Краснодар", "addressRegion": "Краснодарский край", "addressCountry": "RU" },
+    "areaServed": [ { "@type": "City", "name": "Краснодар" }, { "@type": "AdministrativeArea", "name": "Краснодарский край" } ],
+    "sameAs": ["https://t.me/MasterMaler"]
+  }
+  </script>
+</head>
+<body>
+  <!-- Icon sprite (Lucide-style, stroke icons) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+      <symbol id="i-calc" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M8 6h8M16 14v4M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></symbol>
+      <symbol id="i-roller" viewBox="0 0 24 24"><rect width="16" height="6" x="2" y="2" rx="2"/><path d="M10 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect width="4" height="6" x="8" y="16" rx="1"/></symbol>
+      <symbol id="i-brush" viewBox="0 0 24 24"><path d="m14.6 17.9-10.7-2.9"/><path d="M18.4 2.6a1 1 0 1 1 3 3l-4 4a.5.5 0 0 0 0 .7l.9.9a2.4 2.4 0 0 1 0 3.4l-.9.9a.5.5 0 0 1-.7 0L8.4 7.3a.5.5 0 0 1 0-.7l.9-.9a2.4 2.4 0 0 1 3.4 0l.9.9a.5.5 0 0 0 .7 0z"/><path d="M9 8c-1.8 2.7-4 3.5-6.6 3.9a.5.5 0 0 0-.3.8l7.3 8.9a1 1 0 0 0 1.2.2C12.7 20.4 16 16.8 16 15"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.8 2.2a2 2 0 0 0-1.6 0L2.6 6.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0l8.6-3.9a1 1 0 0 0 0-1.8Z"/><path d="m22 17.6-9.2 4.2a2 2 0 0 1-1.6 0L2 17.6"/><path d="m22 12.6-9.2 4.2a2 2 0 0 1-1.6 0L2 12.6"/></symbol>
+      <symbol id="i-trowel" viewBox="0 0 24 24"><path d="M3 21l5-5"/><path d="M8 16l2.5-2.5"/><path d="M10.5 13.5 19 5a1.4 1.4 0 0 1 2 0v0a1.4 1.4 0 0 1 0 2l-8.5 8.5z"/><path d="M13 9l2 2"/></symbol>
+      <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7h2c3 0 5.5-2.5 5.5-5.5C22 6 17.5 2 12 2z"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+      <symbol id="i-building" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></symbol>
+      <symbol id="i-briefcase" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+      <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9h18l-1.5-5h-15z"/><path d="M5 9v11h14V9"/><path d="M10 20v-5h4v5"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/><path d="M19 3v4M17 5h4"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+      <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+      <symbol id="i-arrow-l" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+      <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></symbol>
+      <symbol id="i-eraser" viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></symbol>
+      <symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.7a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
+      <symbol id="i-lr" viewBox="0 0 24 24"><path d="m9 7-5 5 5 5"/><path d="m15 7 5 5-5 5"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+      <symbol id="i-ceiling" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    </defs>
+  </svg>
+  <style>.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}</style>
+
+  <a class="skip-link" href="#main">Перейти к содержанию</a>
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="header" id="top">
+    <div class="container header__inner">
+      <a class="logo" href="#top" aria-label="@MasterMaler — на главную">
+        <span class="logo__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="14" height="6" rx="2" fill="#F59E0B"/><path d="M17 7h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-6a2 2 0 0 0-2 2v1" fill="none" stroke="#FAF5F2" stroke-width="2" stroke-linecap="round"/><rect x="9.5" y="15" width="3" height="6" rx="1" fill="#FAF5F2"/></svg>
+        </span>
+        <span><span class="logo__at">@</span>MasterMaler</span>
+      </a>
+      <nav class="nav" aria-label="Основное меню">
+        <ul>
+          <li><a href="#services">Услуги</a></li>
+          <li><a href="#calculator">Калькулятор</a></li>
+          <li><a href="#works">Результат</a></li>
+          <li><a href="#process">Как работаем</a></li>
+          <li><a href="#contacts">Контакты</a></li>
+        </ul>
+      </nav>
+      <div class="header__actions">
+        <a class="header__phone" href="tel:+79181157676">+7 918 115-76-76</a>
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="Переключить тему">
+          <svg class="i" data-icon-sun><use href="#i-sun"/></svg>
+        </button>
+        <a class="btn btn--sm" href="#calculator">Рассчитать</a>
+        <button class="icon-btn burger" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-menu" data-menu-open>
+          <svg class="i"><use href="#i-menu"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Меню">
+    <button class="icon-btn mobile-menu__close" type="button" aria-label="Закрыть меню" data-menu-close>
+      <svg class="i"><use href="#i-x"/></svg>
+    </button>
+    <a href="#services">Услуги</a>
+    <a href="#calculator">Калькулятор</a>
+    <a href="#works">Результат</a>
+    <a href="#process">Как работаем</a>
+    <a href="#contacts">Контакты</a>
+    <a class="btn" href="tel:+79181157676"><svg class="i"><use href="#i-phone"/></svg>+7 918 115-76-76</a>
+  </div>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__blobs" aria-hidden="true">
+        <div class="blob blob--1"></div><div class="blob blob--2"></div><div class="blob blob--3"></div>
+      </div>
+      <div class="container hero__grid">
+        <div>
+          <p class="hero__badge"><svg class="i"><use href="#i-pin"/></svg>Краснодар и Краснодарский край</p>
+          <h1 class="hero__title" id="hero-title" data-split>Малярные работы, <span class="accent">которые радуют</span></h1>
+          <p class="hero__lead" data-reveal>Покраска стен и потолков, шпаклёвка, грунтовка, декоративная штукатурка и фасады. Отметьте нужные работы в калькуляторе, и заявка сразу придёт мастеру.</p>
+          <div class="hero__cta" data-reveal>
+            <a class="btn" href="#calculator"><svg class="i"><use href="#i-calc"/></svg>Рассчитать объём работ</a>
+            <a class="btn btn--ghost" href="https://t.me/MasterMaler" target="_blank" rel="noopener"><svg class="i"><use href="#i-send"/></svg>Написать в Telegram</a>
+          </div>
+          <ul class="hero__facts" data-reveal>
+            <li><svg class="i"><use href="#i-check-circle"/></svg>Подготовка поверхности под ключ</li>
+            <li><svg class="i"><use href="#i-check-circle"/></svg>Аккуратно и с уборкой</li>
+            <li><svg class="i"><use href="#i-check-circle"/></svg>Ответ в Telegram</li>
+          </ul>
+        </div>
+
+        <div class="wall" aria-hidden="true" data-wall>
+          <svg class="wall__texture" viewBox="0 0 400 500" preserveAspectRatio="none">
+            <filter id="plaster"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="3"/><feColorMatrix values="0 0 0 0 .55  0 0 0 0 .5  0 0 0 0 .46  0 0 0 .35 0"/></filter>
+            <rect width="400" height="500" fill="#D6CEC6"/>
+            <rect width="400" height="500" filter="url(#plaster)"/>
+            <path d="M60 80 q30 40 10 90 t30 120" stroke="#A89C91" stroke-width="2" fill="none" opacity=".7"/>
+            <path d="M300 40 q-20 60 15 110" stroke="#A89C91" stroke-width="1.5" fill="none" opacity=".6"/>
+            <ellipse cx="250" cy="330" rx="60" ry="40" fill="#BFB2A5" opacity=".5"/>
+          </svg>
+          <div class="wall__stripes">
+            <div class="wall__stripe"><div class="wall__paint"></div></div>
+            <div class="wall__stripe"><div class="wall__paint"></div></div>
+            <div class="wall__stripe"><div class="wall__paint"></div></div>
+          </div>
+          <div class="wall__roller">
+            <svg viewBox="0 0 120 150">
+              <rect x="8" y="6" width="104" height="34" rx="12" fill="#F5EFEA"/>
+              <rect x="8" y="6" width="104" height="34" rx="12" fill="url(#rollerShade)"/>
+              <defs><linearGradient id="rollerShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient></defs>
+              <path d="M112 23h4a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H64a4 4 0 0 0-4 4v14" fill="none" stroke="#3F3A36" stroke-width="5" stroke-linecap="round"/>
+              <rect x="52" y="66" width="16" height="80" rx="6" fill="#D97706"/>
+            </svg>
+          </div>
+          <div class="wall__card">
+            <span class="wall__swatch" data-swatch></span>
+            <div><strong data-swatch-name>Шалфей</strong><span>Второй слой, ровно и без полос</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track" data-marquee></div>
+    </div>
+
+    <!-- SERVICES -->
+    <section class="section" id="services" aria-labelledby="services-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Услуги</p>
+          <h2 class="section-title" id="services-title" data-brush>Что я делаю</h2>
+          <p class="section-lead">От подготовки стен до финишного слоя. Можно заказать одну работу или весь комплекс.</p>
+        </div>
+        <div class="bento" data-stagger>
+          <article class="service service--wide" style="--swatch: var(--paint-2)">
+            <span class="service__icon"><svg class="i"><use href="#i-roller"/></svg></span>
+            <h3>Покраска стен</h3>
+            <p>Ровный цвет без полос и пропусков, в один или несколько слоёв.</p>
+            <ul><li>Подбор краски под помещение</li><li>Защита пола, мебели и розеток</li></ul>
+            <button class="service__link" type="button" data-pick="paint-walls">Добавить в расчёт <svg class="i"><use href="#i-arrow-r"/></svg></button>
+          </article>
+          <article class="service service--wide" style="--swatch: var(--paint-1)">
+            <span class="service__icon"><svg class="i"><use href="#i-trowel"/></svg></span>
+            <h3>Шпаклёвка</h3>
+            <p>Стартовая и финишная шпаклёвка, выравнивание и шлифовка под покраску или обои.</p>
+            <ul><li>Выравнивание по маякам и без</li><li>Заделка трещин и рустов</li></ul>
+            <button class="service__link" type="button" data-pick="putty-finish">Добавить в расчёт <svg class="i"><use href="#i-arrow-r"/></svg></button>
+          </article>
+          <article class="service" style="--swatch: var(--paint-4)">
+            <span class="service__icon"><svg class="i"><use href="#i-ceiling"/></svg></span>
+            <h3>Покраска потолков</h3>
+            <p>Белоснежный потолок без разводов и видимых стыков.</p>
+            <button class="service__link" type="button" data-pick="paint-ceiling">Добавить в расчёт <svg class="i"><use href="#i-arrow-r"/></svg></button>
+          </article>
+          <article class="service" style="--swatch: var(--paint-3)">
+            <span class="service__icon"><svg class="i"><use href="#i-sparkles"/></svg></span>
+            <h3>Декоративная штукатурка</h3>
+            <p>Фактурные покрытия и эффекты: бетон, шёлк, микроцемент.</p>
+            <button class="service__link" type="button" data-pick="decor">Добавить в расчёт <svg class="i"><use href="#i-arrow-r"/></svg></button>
+          </article>
+          <article class="service" style="--swatch: #C9B79C">
+            <span class="service__icon"><svg class="i"><use href="#i-home"/></svg></span>
+            <h3>Покраска фасадов</h3>
+            <p>Фасадные краски для кубанского солнца и перепадов погоды.</p>
+            <button class="service__link" type="button" data-pick="facade">Добавить в расчёт <svg class="i"><use href="#i-arrow-r"/></svg></button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALCULATOR -->
+    <section class="section section--alt" id="calculator" aria-labelledby="calc-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Калькулятор и заявка</p>
+          <h2 class="section-title" id="calc-title" data-brush>Рассчитайте объём работ</h2>
+          <p class="section-lead">Отметьте услуги и укажите площадь, а итог отправьте заявкой в Telegram. Точную стоимость мастер назовёт после осмотра объекта.</p>
+        </div>
+
+        <div class="calc">
+          <div class="calc__main">
+            <ol class="steps" aria-label="Шаги расчёта">
+              <li class="is-current"><button type="button" data-goto="0"><span class="bar"></span><span class="label">1. Объект</span></button></li>
+              <li><button type="button" data-goto="1" disabled><span class="bar"></span><span class="label">2. Работы</span></button></li>
+              <li><button type="button" data-goto="2" disabled><span class="bar"></span><span class="label">3. Детали</span></button></li>
+              <li><button type="button" data-goto="3" disabled><span class="bar"></span><span class="label">4. Контакты</span></button></li>
+            </ol>
+            <p class="sr-only" aria-live="polite" data-step-announce></p>
+
+            <form id="calc-form" novalidate>
+              <!-- Step 1 -->
+              <div class="step is-active" data-step="0">
+                <h3 class="step__title" tabindex="-1">Где будут работы?</h3>
+                <p class="step__hint">Шаг 1 из 4: выберите тип объекта и населённый пункт.</p>
+                <fieldset class="fieldset">
+                  <legend>Тип объекта</legend>
+                  <div class="choices">
+                    <label class="choice"><input type="radio" name="object" value="Квартира" checked><span><svg class="i"><use href="#i-building"/></svg>Квартира</span></label>
+                    <label class="choice"><input type="radio" name="object" value="Частный дом"><span><svg class="i"><use href="#i-home"/></svg>Частный дом</span></label>
+                    <label class="choice"><input type="radio" name="object" value="Офис"><span><svg class="i"><use href="#i-briefcase"/></svg>Офис</span></label>
+                    <label class="choice"><input type="radio" name="object" value="Коммерческое помещение"><span><svg class="i"><use href="#i-store"/></svg>Коммерция</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend>Состояние</legend>
+                  <div class="choices">
+                    <label class="choice"><input type="radio" name="condition" value="Новостройка" checked><span>Новостройка</span></label>
+                    <label class="choice"><input type="radio" name="condition" value="Вторичное жильё"><span>Вторичка</span></label>
+                    <label class="choice"><input type="radio" name="condition" value="Освежить ремонт"><span>Освежить ремонт</span></label>
+                  </div>
+                </fieldset>
+                <div class="field">
+                  <label for="city">Населённый пункт</label>
+                  <input class="input" id="city" name="city" type="text" value="Краснодар" autocomplete="address-level2" maxlength="80">
+                  <span class="field__help">Работаю по Краснодару и Краснодарскому краю.</span>
+                </div>
+                <div class="step__nav">
+                  <button class="btn" type="button" data-next>Далее: работы <svg class="i"><use href="#i-arrow-r"/></svg></button>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="step" data-step="1">
+                <h3 class="step__title" tabindex="-1">Какие работы нужны?</h3>
+                <p class="step__hint">Шаг 2 из 4: отметьте услуги и укажите площадь. Если площадь не знаете, пропустите её, мастер уточнит.</p>
+                <div class="tabs" role="tablist" aria-label="Категории услуг" data-tabs></div>
+                <div data-tabpanels></div>
+                <p class="field__error" data-services-error role="alert"></p>
+
+                <details class="room">
+                  <summary><svg class="i"><use href="#i-ruler"/></svg>Не знаете площадь? Посчитайте по размерам комнаты</summary>
+                  <div class="room__grid">
+                    <div class="field"><label for="r-l">Длина, м</label><input class="input" id="r-l" type="number" inputmode="decimal" min="0" step="0.1" placeholder="4.2"></div>
+                    <div class="field"><label for="r-w">Ширина, м</label><input class="input" id="r-w" type="number" inputmode="decimal" min="0" step="0.1" placeholder="3.5"></div>
+                    <div class="field"><label for="r-h">Высота, м</label><input class="input" id="r-h" type="number" inputmode="decimal" min="0" step="0.1" value="2.7"></div>
+                    <div class="field"><label for="r-o">Окна и двери, м²</label><input class="input" id="r-o" type="number" inputmode="decimal" min="0" step="0.1" value="3"></div>
+                  </div>
+                  <div class="room__out" aria-live="polite">
+                    <span>Стены: <output data-room-walls>0</output> м²</span>
+                    <span>Потолок: <output data-room-ceiling>0</output> м²</span>
+                    <button class="link-btn" type="button" data-room-apply>Подставить в отмеченные услуги</button>
+                  </div>
+                </details>
+
+                <div class="step__nav">
+                  <button class="btn btn--ghost" type="button" data-prev><svg class="i"><use href="#i-arrow-l"/></svg>Назад</button>
+                  <button class="btn" type="button" data-next>Далее: детали <svg class="i"><use href="#i-arrow-r"/></svg></button>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="step" data-step="2">
+                <h3 class="step__title" tabindex="-1">Пара деталей</h3>
+                <p class="step__hint">Шаг 3 из 4: так мастер точнее оценит работу.</p>
+                <fieldset class="fieldset">
+                  <legend>Материалы</legend>
+                  <div class="choices">
+                    <label class="choice"><input type="radio" name="materials" value="Закупает мастер" checked><span><svg class="i"><use href="#i-package"/></svg>Закупает мастер</span></label>
+                    <label class="choice"><input type="radio" name="materials" value="Свои материалы"><span><svg class="i"><use href="#i-home"/></svg>Свои материалы</span></label>
+                    <label class="choice"><input type="radio" name="materials" value="Нужна консультация"><span><svg class="i"><use href="#i-palette"/></svg>Нужен совет</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend>Когда начать</legend>
+                  <div class="choices">
+                    <label class="choice"><input type="radio" name="timing" value="Как можно скорее"><span>Как можно скорее</span></label>
+                    <label class="choice"><input type="radio" name="timing" value="В течение 2 недель" checked><span>В течение 2 недель</span></label>
+                    <label class="choice"><input type="radio" name="timing" value="В течение месяца"><span>В течение месяца</span></label>
+                    <label class="choice"><input type="radio" name="timing" value="Пока присматриваюсь"><span>Пока присматриваюсь</span></label>
+                  </div>
+                </fieldset>
+                <div class="field">
+                  <label for="comment">Комментарий</label>
+                  <textarea class="input" id="comment" name="comment" maxlength="1000" placeholder="Например: высокие потолки, нужно убрать старую краску в ванной"></textarea>
+                  <span class="field__help">Фото объекта можно прислать в Telegram после заявки.</span>
+                </div>
+                <div class="step__nav">
+                  <button class="btn btn--ghost" type="button" data-prev><svg class="i"><use href="#i-arrow-l"/></svg>Назад</button>
+                  <button class="btn" type="button" data-next>Далее: контакты <svg class="i"><use href="#i-arrow-r"/></svg></button>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="step" data-step="3">
+                <h3 class="step__title" tabindex="-1">Куда ответить?</h3>
+                <p class="step__hint">Шаг 4 из 4: мастер свяжется с вами удобным способом.</p>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="name">Имя <span class="req" aria-hidden="true">*</span></label>
+                    <input class="input" id="name" name="name" type="text" autocomplete="given-name" required maxlength="60" aria-describedby="name-err">
+                    <span class="field__error" id="name-err"></span>
+                  </div>
+                  <div class="field">
+                    <label for="phone">Телефон <span class="req" aria-hidden="true">*</span></label>
+                    <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+7 (___) ___-__-__" data-phone aria-describedby="phone-err">
+                    <span class="field__error" id="phone-err"></span>
+                  </div>
+                </div>
+                <fieldset class="fieldset">
+                  <legend>Как связаться</legend>
+                  <div class="choices">
+                    <label class="choice"><input type="radio" name="contact" value="Telegram" checked><span><svg class="i"><use href="#i-send"/></svg>Telegram</span></label>
+                    <label class="choice"><input type="radio" name="contact" value="Звонок"><span><svg class="i"><use href="#i-phone"/></svg>Звонок</span></label>
+                    <label class="choice"><input type="radio" name="contact" value="WhatsApp"><span><svg class="i"><use href="#i-phone"/></svg>WhatsApp</span></label>
+                  </div>
+                </fieldset>
+                <div class="field">
+                  <label for="time">Удобное время</label>
+                  <select class="input" id="time" name="time">
+                    <option>В любое время</option>
+                    <option>Утром (9–12)</option>
+                    <option>Днём (12–17)</option>
+                    <option>Вечером (17–21)</option>
+                  </select>
+                </div>
+                <div class="hp" aria-hidden="true"><label>Сайт<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+                <label class="consent">
+                  <input type="checkbox" name="consent" required aria-describedby="consent-err">
+                  <span>Согласен на обработку персональных данных согласно <a href="privacy.html" target="_blank">политике конфиденциальности</a></span>
+                </label>
+                <p class="field__error" id="consent-err"></p>
+                <div class="step__nav">
+                  <button class="btn btn--ghost" type="button" data-prev><svg class="i"><use href="#i-arrow-l"/></svg>Назад</button>
+                  <button class="btn" type="submit"><svg class="i"><use href="#i-send"/></svg><span>Отправить заявку</span></button>
+                </div>
+              </div>
+
+              <div class="step" data-step="done" aria-live="polite"></div>
+            </form>
+          </div>
+
+          <aside class="summary" aria-labelledby="summary-title">
+            <h3 id="summary-title">Ваш расчёт</h3>
+            <ul class="summary__list" data-summary-list></ul>
+            <p class="summary__empty" data-summary-empty>Пока ничего не выбрано. Отметьте работы на шаге 2.</p>
+            <div class="summary__total">
+              <small>Общий объём</small>
+              <span class="summary__area"><span data-summary-area>0</span> м²</span>
+            </div>
+            <div class="summary__price" data-summary-price>
+              <strong>Цена по запросу</strong>
+              Мастер рассчитает стоимость после осмотра и пришлёт её в Telegram.
+            </div>
+            <div class="summary__meta" data-summary-meta></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- BEFORE / AFTER -->
+    <section class="section" id="works" aria-labelledby="works-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Результат</p>
+          <h2 class="section-title" id="works-title" data-brush>До и после</h2>
+          <p class="section-lead">Перетащите ползунок, чтобы сравнить. На картинке показано, как меняется поверхность после подготовки и покраски.</p>
+        </div>
+        <div class="ba-tabs" role="group" aria-label="Пример" data-ba-tabs></div>
+        <div class="ba" data-ba>
+          <div class="ba__layer" data-ba-before></div>
+          <div class="ba__layer ba__after" data-ba-after></div>
+          <span class="ba__tag ba__tag--before">До</span>
+          <span class="ba__tag ba__tag--after">После</span>
+          <input class="ba__range" type="range" min="0" max="100" value="50" aria-label="Сравнение до и после" data-ba-range>
+          <div class="ba__handle" aria-hidden="true"><span class="ba__knob"><svg class="i"><use href="#i-lr"/></svg></span></div>
+        </div>
+        <p class="ba-caption">Это иллюстрация. Сюда можно поставить фотографии ваших объектов: замените их в <code>assets/app.js</code> → <code>BA_SCENES</code>.</p>
+      </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="section section--alt" id="process" aria-labelledby="process-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Как работаем</p>
+          <h2 class="section-title" id="process-title" data-brush>4 простых шага</h2>
+        </div>
+        <ol class="process" data-process>
+          <li class="process__line" aria-hidden="true" role="presentation"><span></span></li>
+          <li><span class="process__num">1</span><h3>Заявка</h3><p>Отмечаете работы в калькуляторе, и заявка приходит мастеру в Telegram.</p></li>
+          <li><span class="process__num">2</span><h3>Осмотр и смета</h3><p>Уточняем объём и материалы, вы получаете стоимость и сроки.</p></li>
+          <li><span class="process__num">3</span><h3>Работа</h3><p>Укрываем всё лишнее, готовим поверхность и наносим покрытие.</p></li>
+          <li><span class="process__num">4</span><h3>Сдача</h3><p>Принимаете результат при хорошем освещении, мы убираем за собой.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- WHY -->
+    <section class="section" aria-labelledby="why-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Подход</p>
+          <h2 class="section-title" id="why-title" data-brush>На чём держится качество</h2>
+        </div>
+        <div class="why" data-stagger>
+          <div class="why__item"><svg class="i"><use href="#i-layers"/></svg><h3>Подготовка — половина результата</h3><p>Грунт, шпаклёвка и шлифовка по технологии, чтобы краска легла ровно и держалась долго.</p></div>
+          <div class="why__item"><svg class="i"><use href="#i-shield"/></svg><h3>Бережно к дому</h3><p>Плёнка на полу и мебели, малярный скотч на розетках и откосах.</p></div>
+          <div class="why__item"><svg class="i"><use href="#i-sparkles"/></svg><h3>Чисто после работ</h3><p>Вывозим мусор и убираем пыль. Вы заходите в готовое помещение.</p></div>
+          <div class="why__item"><svg class="i"><use href="#i-palette"/></svg><h3>Помощь с цветом</h3><p>Подскажем оттенок и тип краски для кухни, ванной или детской.</p></div>
+          <div class="why__item"><svg class="i"><use href="#i-file"/></svg><h3>Понятная смета</h3><p>Каждая работа отдельной строкой: видно, за что вы платите.</p></div>
+          <div class="why__item"><svg class="i"><use href="#i-clock"/></svg><h3>На связи</h3><p>Быстро отвечаем в Telegram и присылаем фото по ходу работ.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACTS -->
+    <section class="section section--alt" id="contacts" aria-labelledby="contacts-title">
+      <div class="container contact">
+        <div>
+          <div class="section-head">
+            <p class="eyebrow">Контакты</p>
+            <h2 class="section-title" id="contacts-title" data-brush>Давайте обсудим</h2>
+            <p class="section-lead">Позвоните, напишите в Telegram или оставьте номер, и я перезвоню.</p>
+          </div>
+          <div class="contact__cards" data-stagger>
+            <a class="contact__card" href="tel:+79181157676"><span class="ic"><svg class="i"><use href="#i-phone"/></svg></span><span><small>Телефон</small><strong>+7 918 115-76-76</strong></span></a>
+            <a class="contact__card" href="https://t.me/MasterMaler" target="_blank" rel="noopener"><span class="ic"><svg class="i"><use href="#i-send"/></svg></span><span><small>Telegram</small><strong>@MasterMaler</strong></span></a>
+            <div class="contact__card"><span class="ic"><svg class="i"><use href="#i-pin"/></svg></span><span><small>География</small><strong>Краснодар и Краснодарский край</strong></span></div>
+          </div>
+        </div>
+
+        <form class="callback" id="callback-form" novalidate>
+          <h3>Перезвоните мне</h3>
+          <p>Оставьте имя и телефон. Перезвоню и отвечу на вопросы.</p>
+          <div class="field">
+            <label for="cb-name">Имя <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="cb-name" name="name" type="text" autocomplete="given-name" required maxlength="60" aria-describedby="cb-name-err">
+            <span class="field__error" id="cb-name-err"></span>
+          </div>
+          <div class="field">
+            <label for="cb-phone">Телефон <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="cb-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+7 (___) ___-__-__" data-phone aria-describedby="cb-phone-err">
+            <span class="field__error" id="cb-phone-err"></span>
+          </div>
+          <div class="hp" aria-hidden="true"><label>Сайт<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <label class="consent">
+            <input type="checkbox" name="consent" required aria-describedby="cb-consent-err">
+            <span>Согласен на обработку персональных данных согласно <a href="privacy.html" target="_blank">политике конфиденциальности</a></span>
+          </label>
+          <p class="field__error" id="cb-consent-err"></p>
+          <button class="btn btn--block" type="submit"><svg class="i"><use href="#i-phone"/></svg><span>Жду звонка</span></button>
+          <p class="field__help" style="margin-top:12px" data-cb-status aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a class="logo" href="#top"><span><span class="logo__at">@</span>MasterMaler</span></a>
+      <span>Малярные работы в Краснодаре и Краснодарском крае</span>
+      <span><a href="tel:+79181157676">+7 918 115-76-76</a> · <a href="https://t.me/MasterMaler" target="_blank" rel="noopener">Telegram</a> · <a href="privacy.html">Конфиденциальность</a></span>
+      <span>© <span data-year>2026</span> @MasterMaler</span>
+    </div>
+  </footer>
+
+  <nav class="mbar" aria-label="Быстрые действия" data-mbar>
+    <a class="btn btn--ghost" href="tel:+79181157676"><svg class="i"><use href="#i-phone"/></svg>Позвонить</a>
+    <a class="btn" href="#calculator"><svg class="i"><use href="#i-calc"/></svg>Заявка</a>
+  </nav>
+
+  <div class="toast" role="status" aria-live="polite" data-toast></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
