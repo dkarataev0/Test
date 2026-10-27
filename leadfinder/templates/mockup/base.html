@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ c.name }} — {{ c.category|lower }}, {{ city }}</title>
+<meta name="description" content="{{ x.lead }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?{{ fonts }}&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: {{ p.bg }}; --surface: {{ p.surface }}; --ink: {{ p.ink }}; --muted: {{ p.muted }};
+  --accent: {{ p.accent }}; --accent-ink: {{ p.accent_ink }}; --soft: {{ p.soft }}; --line: {{ p.line }};
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+.ribbon { background: var(--ink); color: var(--bg); font-size: 13px; text-align: center; padding: 7px 16px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px;
+  border: 0; border-radius: var(--btn-radius, 999px); background: var(--accent); color: var(--accent-ink);
+  font-weight: 700; font-size: 16px; text-decoration: none; cursor: pointer; transition: transform .15s, filter .15s;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(.98); }
+.btn.line { background: transparent; color: inherit; box-shadow: inset 0 0 0 1.5px currentColor; }
+section { padding: 96px 0; }
+h2 { font: var(--h2-weight, 400) clamp(30px, 4.2vw, 48px)/1.1 var(--display); letter-spacing: -.01em; margin-bottom: 18px; }
+.sub { color: var(--muted); max-width: 56ch; margin-bottom: 44px; }
+
+/* Отзывы */
+.reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+.review { border-left: 3px solid var(--accent); padding-left: 22px; }
+.review p { font-size: 18px; margin-bottom: 14px; }
+.review b { display: block; }
+.review small { color: var(--muted); }
+.reviews-note { color: var(--muted); font-size: 14px; margin-top: 36px; }
+
+/* Вопросы */
+.faq { max-width: 760px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; padding: 22px 40px 22px 0; font-weight: 700; font-size: 18px; position: relative; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 4px; top: 16px; font-size: 28px; font-weight: 400; color: var(--accent); transition: transform .2s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { padding: 0 0 22px; color: var(--muted); max-width: 62ch; }
+
+/* Контакты */
+.contacts { background: var(--soft); }
+.contacts .wrap { display: grid; grid-template-columns: 1fr 1.25fr; gap: 48px; align-items: stretch; }
+.c-rows { display: grid; gap: 26px; margin: 8px 0 34px; }
+.c-rows dt { color: var(--muted); font-size: 14px; }
+.c-rows dd { font-size: 19px; font-weight: 600; }
+.c-rows dd a { text-decoration: none; }
+.map { min-height: 380px; border-radius: var(--map-radius, 24px); overflow: hidden; background: var(--line); }
+.map iframe { width: 100%; height: 100%; min-height: 380px; border: 0; display: block; }
+.c-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+footer { padding: 30px 0 100px; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* Нижняя панель на телефоне */
+.mbar { display: none; }
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  section { padding: 64px 0; }
+  .reviews-grid { grid-template-columns: 1fr; gap: 28px; }
+  .contacts .wrap { grid-template-columns: 1fr; }
+  .top .btn.line { display: none; }
+  h2 { font-size: clamp(26px, 7.4vw, 34px); overflow-wrap: anywhere; }
+  .mbar {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line);
+  }
+  .mbar .btn { min-height: 48px; padding: 0 12px; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+{% block style %}{% endblock %}
+</style>
+</head>
+<body>
+<div class="ribbon">Концепт сайта для {{ qname }}. Цены и отзывы — примерные, заменим на ваши.</div>
+{% block body %}{% endblock %}
+
+<section id="reviews"><div class="wrap">
+  <h2>{{ reviews_title|default("Что говорят клиенты") }}</h2>
+  <div class="reviews-grid">
+    {% for text, who, note in x.reviews %}
+    <figure class="review"><p>«{{ text }}»</p><b>{{ who }}</b><small>{{ note }}</small></figure>
+    {% endfor %}
+  </div>
+  <p class="reviews-note">Здесь появятся ваши настоящие отзывы с Яндекс Карт и 2ГИС.</p>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <h2>Частые вопросы</h2>
+  <div class="faq">
+    {% for q, a in x.faq %}<details{% if loop.first %} open{% endif %}><summary>{{ q }}</summary><p>{{ a }}</p></details>{% endfor %}
+  </div>
+</div></section>
+
+<section id="contacts" class="contacts"><div class="wrap">
+  <div>
+    <h2>Как нас найти</h2>
+    <dl class="c-rows">
+      <div><dt>Адрес</dt><dd>{{ city }}{% if c.address %}, {{ c.address }}{% endif %}</dd></div>
+      {% if c.phone %}<div><dt>Телефон</dt><dd><a href="tel:+{{ phone_digits }}">{{ c.phone }}</a></dd></div>{% endif %}
+      <div><dt>Часы работы</dt><dd>{% for h in hours %}{{ h }}{% if not loop.last %}<br>{% endif %}{% endfor %}</dd></div>
+    </dl>
+    <div class="c-actions">
+      {% if phone_digits %}<a class="btn" href="tel:+{{ phone_digits }}">Позвонить</a>{% endif %}
+      {% if wa_link %}<a class="btn line" href="{{ wa_link }}">Написать в WhatsApp</a>{% endif %}
+    </div>
+  </div>
+  <div class="map">{% if map_url %}<iframe src="{{ map_url }}" loading="lazy" title="{{ c.name }} на карте"></iframe>{% endif %}</div>
+</div></section>
+
+<footer><div class="wrap"><span>© {{ year }} {{ c.name }}</span><span>{{ c.category }}, {{ city }}</span></div></footer>
+
+<nav class="mbar" aria-label="Быстрые действия">
+  {% if phone_digits %}<a class="btn line" href="tel:+{{ phone_digits }}">Позвонить</a>{% else %}<a class="btn line" href="#contacts">Контакты</a>{% endif %}
+  <a class="btn" href="#{{ cta_anchor|default('top') }}">{{ x.cta }}</a>
+</nav>
+<script>{% block script %}{% endblock %}</script>
+</body>
+</html>

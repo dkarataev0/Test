@@ -1,0 +1,152 @@
+{% extends "mockup/base.html" %}
+{% block style %}
+:root { --display: "Tektur", "Arial Narrow", sans-serif; --body: "Golos Text", system-ui, sans-serif; --h2-weight: 700; --btn-radius: 6px; --map-radius: 6px; }
+.band { background: var(--ink); color: var(--bg); position: relative; overflow: hidden; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 0; position: relative; z-index: 2; }
+.logo { font: 700 22px/1 var(--display); text-decoration: none; letter-spacing: .01em; }
+.top nav { display: flex; gap: 28px; font-size: 15px; }
+.top nav a { text-decoration: none; opacity: .75; }
+.top nav a:hover { opacity: 1; }
+.band .btn.line { color: var(--bg); background: color-mix(in srgb, var(--ink) 55%, transparent); backdrop-filter: blur(6px); }
+.hero-photo { position: absolute; top: 0; right: 0; bottom: 0; width: 46%; clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%); }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.85); }
+.hero { position: relative; z-index: 1; padding: 56px 0 80px; max-width: 620px; }
+.hero h1 { font: 700 clamp(40px, 6vw, 76px)/1 var(--display); letter-spacing: -.01em; margin-bottom: 20px; overflow-wrap: anywhere; }
+.hero .lead { font-size: 19px; opacity: .8; max-width: 44ch; margin-bottom: 32px; }
+
+/* Калькулятор */
+.calc { background: var(--surface); color: var(--ink); border-radius: 10px; padding: 24px; border-top: 6px solid var(--accent); }
+.calc h2 { font-size: 20px; margin-bottom: 14px; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--soft); border-radius: 8px; padding: 4px; margin-bottom: 14px; }
+.seg button { border: 0; background: none; padding: 10px 6px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.works { display: grid; gap: 6px; margin-bottom: 16px; }
+.works label { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 8px; cursor: pointer; font-size: 15px; }
+.works label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.works input { accent-color: var(--accent); width: 18px; height: 18px; }
+.works span { flex: 1; }
+.works small { color: var(--muted); white-space: nowrap; }
+.total { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 14px; }
+.total span { color: var(--muted); font-size: 14px; }
+.total output { font: 700 38px/1 var(--display); }
+.calc .btn { width: 100%; }
+
+.list { border-top: 2px solid var(--ink); }
+.list-row { display: grid; grid-template-columns: 1fr 160px 140px; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.list-row b { font-size: 18px; }
+.list-row .g { color: var(--muted); font-size: 15px; }
+.list-row .p { font: 700 20px var(--display); text-align: right; }
+
+.timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; position: relative; }
+.timeline::before { content: ""; position: absolute; top: 19px; left: 0; right: 0; height: 2px; background: var(--line); }
+.tl { position: relative; counter-increment: t; }
+.tl::before { content: counter(t); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font: 700 18px var(--display); margin-bottom: 18px; position: relative; }
+.tl h3 { font: 700 19px var(--display); margin-bottom: 6px; }
+.tl p { color: var(--muted); font-size: 15px; }
+.process { background: var(--soft); counter-reset: t; }
+
+.warranty { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+.warranty .big { font: 700 clamp(56px, 9vw, 120px)/.9 var(--display); color: var(--accent); }
+.warranty p { font-size: 19px; max-width: 46ch; }
+.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; }
+
+@media (max-width: 960px) {
+  .hero-photo { position: relative; width: 100%; height: 240px; clip-path: none; }
+  .top nav { display: none; }
+  .hero { padding: 32px 0 56px; }
+  .timeline { grid-template-columns: 1fr; }
+  .timeline::before { top: 0; bottom: 0; left: 19px; right: auto; width: 2px; height: auto; }
+  .tl { padding-left: 60px; }
+  .tl::before { position: absolute; left: 0; top: 0; margin: 0; }
+  .warranty { grid-template-columns: 1fr; gap: 16px; }
+  .gallery { grid-template-columns: 1fr 1fr; }
+  .gallery img:first-child { grid-column: 1 / -1; }
+  .list-row { grid-template-columns: 1fr auto; }
+  .list-row .g { grid-column: 1; grid-row: 2; }
+  .list-row .p { grid-row: 1 / span 2; grid-column: 2; }
+}
+{% endblock %}
+
+{% block body %}
+<div class="band" id="top">
+  <div class="wrap top">
+    <a class="logo" href="#top">{{ c.name }}</a>
+    <nav><a href="#prices">Цены</a><a href="#process">Как работаем</a><a href="#contacts">Контакты</a></nav>
+    {% if c.phone %}<a class="btn line" href="tel:+{{ phone_digits }}">{{ c.phone }}</a>{% endif %}
+  </div>
+  <div class="hero-photo"><img src="{{ photos[0] }}" alt="{{ c.category }} {{ c.name }}" fetchpriority="high"></div>
+  <div class="wrap"><div class="hero">
+    <h1>{{ c.name }}</h1>
+    <p class="lead">{{ x.lead }}</p>
+    <div class="calc" id="calc">
+      <h2>Сколько будет стоить</h2>
+      <div class="seg" role="group" aria-label="Тип машины">
+        <button type="button" aria-pressed="true" data-k="1">Легковая</button>
+        <button type="button" aria-pressed="false" data-k="1.2">Кроссовер</button>
+        <button type="button" aria-pressed="false" data-k="1.4">Внедорожник</button>
+      </div>
+      <div class="works">
+        {% for name, price in x.calc %}
+        <label><input type="checkbox" value="{{ price }}" data-name="{{ name }}" {% if loop.first %}checked{% endif %}><span>{{ name }}</span><small>{% if price %}от {{ "{:,}".format(price).replace(",", " ") }} ₽{% else %}бесплатно{% endif %}</small></label>
+        {% endfor %}
+      </div>
+      <div class="total"><span>Ориентировочно</span><output id="sum">0 ₽</output></div>
+      <a class="btn" id="calc-btn" href="{% if wa_link %}{{ wa_link }}{% else %}#contacts{% endif %}">{{ x.cta }}</a>
+    </div>
+  </div></div>
+</div>
+
+<section id="prices"><div class="wrap">
+  <h2>Цены на работы</h2>
+  <p class="sub">Цена для легкового автомобиля. Точную сумму назовём после осмотра — и только потом начнём.</p>
+  <div class="list">
+    {% for name, price in x.calc %}
+    <div class="list-row"><b>{{ name }}</b><span class="g">Гарантия 6 месяцев</span><span class="p">{% if price %}от {{ "{:,}".format(price).replace(",", " ") }} ₽{% else %}0 ₽{% endif %}</span></div>
+    {% endfor %}
+  </div>
+</div></section>
+
+<section class="process" id="process"><div class="wrap">
+  <h2>Как мы работаем</h2>
+  <p class="sub">Пять шагов, на каждом вы знаете, что происходит с машиной.</p>
+  <div class="timeline">{% for t, d in x.steps %}<div class="tl"><h3>{{ t }}</h3><p>{{ d }}</p></div>{% endfor %}</div>
+</div></section>
+
+<section><div class="wrap warranty">
+  <div class="big">6 мес.</div>
+  <p>Гарантия на работы и установленные запчасти. Если что-то пошло не так — исправим бесплатно, без споров и экспертиз.</p>
+</div></section>
+
+{% if photos|length > 2 %}
+<section style="padding-top:0"><div class="wrap">
+  <div class="gallery">{% for ph in photos[1:4] %}<img src="{{ ph }}" alt="{{ c.name }}" loading="lazy">{% endfor %}</div>
+</div></section>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+(() => {
+  const calc = document.getElementById("calc"), out = document.getElementById("sum"), btn = document.getElementById("calc-btn");
+  let k = 1;
+  const fmt = n => n.toLocaleString("ru-RU") + " ₽";
+  function update() {
+    const picked = [...calc.querySelectorAll(".works input:checked")];
+    const total = Math.round(picked.reduce((s, i) => s + +i.value, 0) * k / 50) * 50;
+    out.textContent = picked.length ? fmt(total) : "—";
+    if (btn.href.includes("wa.me")) {
+      const u = new URL(btn.href);
+      u.searchParams.set("text", "Здравствуйте! Хочу записаться: " + picked.map(i => i.dataset.name).join(", "));
+      btn.href = u;
+    }
+  }
+  calc.querySelector(".seg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    k = +b.dataset.k;
+    calc.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    update();
+  });
+  calc.addEventListener("change", update);
+  update();
+})();
+{% endblock %}
