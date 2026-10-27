@@ -107,7 +107,9 @@ class PgStorage(Storage):
         self._psycopg = psycopg
         self.url = url
         with self._conn() as db:
-            db.execute(PG_SCHEMA)
+            # таблицы могли создать заранее (у пользователя приложения может не быть прав CREATE)
+            if db.execute("SELECT to_regclass('companies')").fetchone()[0] is None:
+                db.execute(PG_SCHEMA)
 
     @contextmanager
     def _conn(self):
